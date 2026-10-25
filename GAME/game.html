@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Anime Legends: JoJo Stand & Training Dojo Edition</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+:root{
+ --gold:#ffcc33;--cyan:#00f0ff;--pink:#ff2a6d;--purple:#b5179e;--bg:#060913;
+ --panel:#0d1527f4;--border:#2d426b;
+}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:#fff;font-family:'Segoe UI',Roboto,system-ui,sans-serif;touch-action:none}
+canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+
+/* UI SCREENS */
+.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:10px;background:radial-gradient(circle at center,#142242cc,#050811f5);z-index:10;backdrop-filter:blur(7px)}
+.panel{width:100%;max-width:880px;max-height:95vh;overflow-y:auto;background:var(--panel);border:1.5px solid var(--border);border-radius:20px;padding:14px 18px;box-shadow:0 20px 60px #000d,inset 0 1px 0 #ffffff22}
+.panel::-webkit-scrollbar{width:5px}.panel::-webkit-scrollbar-thumb{background:#334872;border-radius:6px}
+
+.title-wrap{text-align:center;margin-bottom:6px}
+.badge{display:inline-block;padding:3px 11px;border-radius:99px;background:linear-gradient(90deg,#ff2a6d,#7209b7,#00f0ff);font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px}
+h1{margin:0;font-size:clamp(20px,4.8vw,35px);font-weight:900;letter-spacing:1px;text-transform:uppercase;font-style:italic;text-shadow:0 4px 18px #00f0ff44}
+h1 span{background:linear-gradient(90deg,#00f0ff,#ffcc33);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:#9cb1d4;font-size:10px;letter-spacing:1.4px}
+
+.row-split{display:grid;grid-template-columns:1.25fr .9fr 1fr;gap:8px;margin-top:6px}
+@media(max-width:740px){.row-split{grid-template-columns:1fr}}
+
+.label{font-size:10.5px;letter-spacing:1.2px;color:#8fa8d1;font-weight:800;margin:7px 0 4px;display:flex;justify-content:space-between;align-items:center}
+.options{display:flex;gap:5px;flex-wrap:wrap}
+.opt{flex:1 1 22%;min-height:33px;background:#16223b;border:1.5px solid #2c4068;border-radius:9px;padding:5px 7px;color:#dce8ff;font-size:11px;font-weight:800;cursor:pointer;transition:.15s}
+.opt.selected{background:linear-gradient(135deg,#133c55,#182848);border-color:var(--cyan);color:#fff;box-shadow:0 0 14px #00f0ff3a}
+
+/* 10-CHARACTER GRID */
+.char-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+@media(max-width:520px){.char-grid{grid-template-columns:repeat(5,1fr);gap:4px}}
+.char-card{background:#141f36;border:1.5px solid #2b3e63;border-radius:10px;padding:5px 3px;text-align:center;cursor:pointer;transition:.16s;position:relative;overflow:hidden}
+.char-card .avatar{width:32px;height:32px;margin:0 auto 3px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;box-shadow:inset 0 0 10px #0008}
+.char-card .cname{font-size:10px;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.char-card .ctitle{font-size:8px;color:#93a8cc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.char-card.selected{border-color:var(--gold);background:linear-gradient(180deg,#2b2518,#151f36);transform:translateY(-2px);box-shadow:0 4px 15px #ffcc3340}
+.char-card.selected2{border-color:var(--pink);background:linear-gradient(180deg,#331629,#151f36);transform:translateY(-2px);box-shadow:0 4px 15px #ff2a6d40}
+
+.move-preview{background:#09101f;border:1px solid #243556;border-radius:9px;padding:6px 10px;margin-top:5px;font-size:10.5px;color:#b8ccee;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.move-preview b{color:var(--gold)}
+
+#fightBtn{width:100%;margin-top:9px;padding:12px;background:linear-gradient(90deg,#ff2a6d,#ff7b00,#ffcc33);border:0;border-radius:12px;color:#090d16;font-size:15px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 25px #ff2a6d55}
+#fightBtn:active{transform:scale(.98)}
+
+/* TOURNAMENT LADDER MODAL */
+.ladder-list{display:flex;flex-direction:column;gap:7px;margin:14px 0}
+.rung{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;border-radius:11px;background:#131f36;border:1.5px solid #283b60;font-size:12px;font-weight:800}
+.rung.cleared{opacity:.55;border-color:#2ec4b6;background:#0f292a}
+.rung.active{border-color:var(--gold);background:linear-gradient(90deg,#2b2314,#16233d);box-shadow:0 0 18px #ffcc3333;transform:scale(1.02)}
+.rung-tag{font-size:10px;padding:2px 8px;border-radius:6px;background:#ffffff18}
+
+/* TOP HUD */
+#hud{display:none;position:fixed;top:12px;left:16px;right:16px;z-index:5;pointer-events:none}
+.hud-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}
+.p-box{display:flex;flex-direction:column;gap:4px;min-width:0}
+.p-box.right{align-items:flex-end;text-align:right}
+.p-header{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:900;letter-spacing:.8px;text-shadow:0 2px 4px #000}
+.p-box.right .p-header{flex-direction:row-reverse}
+.tag-char{padding:2px 7px;border-radius:5px;font-size:10px;background:#ffffff1a;border:1px solid #ffffff30}
+.wins{display:flex;gap:4px}
+.win-dot{width:10px;height:10px;border-radius:50%;background:#263552;border:1px solid #6781ad}
+.win-dot.on{background:var(--gold);box-shadow:0 0 8px var(--gold);border-color:#fff}
+
+.bar-wrap{width:100%;height:15px;background:#151f33;border-radius:9px;padding:2px;border:1.5px solid #485e88;box-shadow:0 3px 10px #0009;position:relative;overflow:hidden}
+.hp-ghost{position:absolute;top:2px;bottom:2px;left:2px;background:#ff3b5c;border-radius:6px;transition:width .4s ease-out}
+.hp-fill{position:relative;height:100%;width:100%;border-radius:6px;transition:width .1s}
+#hp1{background:linear-gradient(90deg,#00e1ff,#38ff9c)}
+#hp2{background:linear-gradient(270deg,#ff2a6d,#ff9e2c)}
+.p-box.right .hp-ghost{left:auto;right:2px}
+.p-box.right .hp-fill{margin-left:auto}
+
+.ki-wrap{width:85%;height:8px;background:#111a2b;border-radius:99px;overflow:hidden;border:1px solid #354c73;position:relative}
+.ki-fill{height:100%;width:0%;background:linear-gradient(90deg,#4895ef,#00f0ff,#fff);transition:width .08s}
+.ki-fill.max{background:linear-gradient(90deg,#ff9e00,#ffee32,#fff);box-shadow:0 0 10px var(--gold)}
+
+.center-hud{text-align:center;min-width:78px}
+#timer{font-size:21px;font-weight:900;color:#fff;background:#101a2ee6;border:1.5px solid #4b6391;border-radius:10px;padding:2px 10px;text-shadow:0 0 10px var(--cyan)}
+#roundTxt{font-size:10px;font-weight:900;color:var(--gold);letter-spacing:1.1px;margin-top:3px;text-shadow:0 2px 4px #000}
+
+/* TRAINING DOJO CONTROL BAR */
+#trainBar{display:none;position:fixed;top:72px;left:16px;z-index:6;gap:6px;flex-wrap:wrap;align-items:center;max-width:calc(100vw - 175px)}
+.t-btn{background:#121e36ee;border:1.5px solid #00f0ff88;color:#fff;border-radius:8px;padding:6px 10px;font-size:10.5px;font-weight:800;cursor:pointer;box-shadow:0 4px 12px #0008}
+.t-btn span{color:var(--gold)}
+
+/* TOP RIGHT MENU & SFX BUTTONS */
+.top-btns{position:fixed;top:72px;right:16px;z-index:6;display:none;gap:8px}
+.icon-btn{background:#121e36ee;border:1.5px solid #5873a8;color:#fff;border-radius:9px;padding:7px 11px;font-size:11px;font-weight:900;cursor:pointer;box-shadow:0 4px 12px #0008}
+
+#banner{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:7;font-size:clamp(24px,5.5vw,50px);font-weight:900;font-style:italic;color:#fff;text-shadow:0 0 25px var(--cyan),0 6px 0 #000;opacity:0;transform:scale(1.4);transition:.22s;text-align:center;padding:12px}
+#banner.show{opacity:1;transform:scale(1)}
+
+/* NON-OVERLAPPING CONTROLS */
+#controls{display:none;position:fixed;z-index:6;left:16px;right:16px;bottom:14px;align-items:flex-end;justify-content:space-between;pointer-events:none}
+.cluster{display:flex;align-items:flex-end;gap:12px;pointer-events:auto}
+.joybox{display:flex;flex-direction:column;align-items:center;gap:5px}
+.small-label{font-size:9.5px;letter-spacing:1.1px;color:#d0e2ff;font-weight:900;text-shadow:0 2px 4px #000}
+
+.joystick{width:clamp(88px,19vw,112px);height:clamp(88px,19vw,112px);border-radius:50%;position:relative;touch-action:none;border:2px solid #6b88bd;background:radial-gradient(circle,#24395ec9,#0d172add);box-shadow:0 6px 22px #0009,inset 0 0 15px #050b14}
+.joystick:before{content:"▲ JUMP";position:absolute;top:6px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:900;color:#9cb8e899}
+.knob{position:absolute;left:50%;top:50%;width:42%;height:42%;transform:translate(-50%,-50%);border-radius:50%;background:linear-gradient(145deg,#7893ba,#2f4569);border:2px solid #c5dcff;box-shadow:0 4px 12px #000a}
+.joystick.active .knob{background:linear-gradient(145deg,#4df3ff,#0984ad);border-color:#fff;box-shadow:0 0 18px var(--cyan)}
+
+.btn-grid{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.btn-row{display:flex;gap:8px;align-items:center}
+
+.act{width:clamp(52px,12.5vw,64px);height:clamp(52px,12.5vw,64px);border-radius:50%;border:2px solid #728ab5;color:#fff;font-size:10px;font-weight:900;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;box-shadow:0 5px 15px #0009;cursor:pointer;transition:transform .08s,filter .08s;flex-shrink:0}
+.act small{font-size:7.5px;opacity:.88;font-weight:700;margin-top:1px}
+.act:active,.act.pressed{transform:scale(.9);filter:brightness(1.35)}
+
+.act.atk{width:clamp(62px,14.5vw,74px);height:clamp(62px,14.5vw,74px);background:linear-gradient(145deg,#e62e62,#691430);border-color:#ff7aa2;font-size:11px}
+.act.skill{background:linear-gradient(145deg,#1d7fe0,#10386b);border-color:#6bc1ff}
+.act.ult{background:linear-gradient(145deg,#f59f00,#6e3b00);border-color:#ffe066;opacity:.48}
+.act.ult.ready{opacity:1;animation:ultPulse .8s infinite alternate;box-shadow:0 0 22px #ffcc33}
+.act.blk{background:linear-gradient(145deg,#1ba89c,#0d4745);border-color:#6ef7ec}
+.act.dash{background:linear-gradient(145deg,#6f42c1,#311b59);border-color:#b892ff}
+
+@keyframes ultPulse{from{transform:scale(1)}to{transform:scale(1.08)}}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- MAIN MENU -->
+<div class="screen" id="menu">
+ <main class="panel">
+  <div class="title-wrap">
+   <span class="badge">JoJo Stands · Ultimate Kars · Training Dojo</span>
+   <h1>ANIME <span>LEGENDS</span></h1>
+   <div class="sub">JOTARO · DIO · KARS · GOKU · LUFFY · NARUTO · GOJO · ICHIGO · AIZEN · EREN</div>
+  </div>
+
+  <div class="row-split">
+   <div>
+    <div class="label">GAME MODE</div>
+    <div class="options" id="modes">
+     <button class="opt selected" data-v="tourney">🏆 Tournament</button>
+     <button class="opt" data-v="train">🥋 Training Dojo</button>
+     <button class="opt" data-v="ai">1P vs AI</button>
+     <button class="opt" data-v="two">2P Duel</button>
+    </div>
+   </div>
+   <div>
+    <div class="label">AI DIFFICULTY</div>
+    <div class="options" id="diffs">
+     <button class="opt selected" data-v="easy">Easy</button>
+     <button class="opt" data-v="normal">Normal</button>
+     <button class="opt" data-v="hard">Hard</button>
+    </div>
+   </div>
+   <div>
+    <div class="label">BATTLE ARENA</div>
+    <div class="options" id="stages">
+     <button class="opt selected" data-v="cairo">Cairo Bridge</button>
+     <button class="opt" data-v="dojo">Shinobi Dojo</button>
+     <button class="opt" data-v="namek">Namek</button>
+     <button class="opt" data-v="shibuya">Shibuya</button>
+    </div>
+   </div>
+  </div>
+
+  <div class="label"><span>YOUR CHAMPION (PLAYER 1)</span><span id="p1PickName" style="color:var(--gold)">JOTARO (STAR PLATINUM)</span></div>
+  <div class="char-grid" id="c1"></div>
+  <div class="move-preview" id="p1Moves"></div>
+
+  <div id="p2SelectWrap" style="display:none">
+   <div class="label"><span>OPPONENT / TRAINING PARTNER</span><span id="p2PickName" style="color:var(--pink)">DIO (THE WORLD)</span></div>
+   <div class="char-grid" id="c2"></div>
+   <div class="move-preview" id="p2Moves"></div>
+  </div>
+
+  <button id="fightBtn">ENTER GRAND TOURNAMENT 🏆</button>
+  <div style="text-align:center;color:#8aa2c9;font-size:10px;margin-top:5px">
+   Tip: Pit <b>Jotaro vs DIO</b> for their iconic Cairo Time-Stop Rivalry &amp; ORA vs MUDA Stand Clash!
+  </div>
+ </main>
+</div>
+
+<!-- TOURNAMENT BRACKET SCREEN -->
+<div class="screen" id="bracketScreen" style="display:none">
+ <main class="panel" style="max-width:480px;text-align:center">
+  <span class="badge">GRAND ANIME TOURNAMENT</span>
+  <h1 style="font-size:28px;margin-top:4px">CHAMPIONSHIP <span>LADDER</span></h1>
+  <div class="ladder-list" id="ladderList"></div>
+  <button id="nextMatchBtn" class="opt selected" style="width:100%;padding:13px;font-size:14px;background:linear-gradient(90deg,#00b4d8,#0077b6)">START NEXT MATCH ▶</button>
+  <button id="abortTourneyBtn" class="opt" style="width:100%;margin-top:7px">EXIT TO MENU</button>
+ </main>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+ <div class="hud-top">
+  <div class="p-box">
+   <div class="p-header">
+    <span id="hudP1Name">JOTARO</span>
+    <span class="tag-char" id="hudP1Sub">P1</span>
+    <div class="wins" id="wins1"><span class="win-dot"></span><span class="win-dot"></span></div>
+   </div>
+   <div class="bar-wrap">
+    <div class="hp-ghost" id="ghost1" style="width:100%"></div>
+    <div class="hp-fill" id="hp1"></div>
+   </div>
+   <div class="ki-wrap"><div class="ki-fill" id="ki1"></div></div>
+  </div>
+
+  <div class="center-hud">
+   <div id="timer">99</div>
+   <div id="roundTxt">ROUND 1</div>
+  </div>
+
+  <div class="p-box right">
+   <div class="p-header">
+    <span id="hudP2Name">DIO</span>
+    <span class="tag-char" id="hudP2Sub">AI</span>
+    <div class="wins" id="wins2"><span class="win-dot"></span><span class="win-dot"></span></div>
+   </div>
+   <div class="bar-wrap">
+    <div class="hp-ghost" id="ghost2" style="width:100%"></div>
+    <div class="hp-fill" id="hp2"></div>
+   </div>
+   <div class="ki-wrap"><div class="ki-fill" id="ki2"></div></div>
+  </div>
+ </div>
+</div>
+
+<!-- INTERACTIVE TRAINING DOJO TOOLBAR -->
+<div id="trainBar">
+ <button class="t-btn" id="tDummyBtn">DUMMY: <span>STAND</span></button>
+ <button class="t-btn" id="tFillBtn">⚡ <span>MAX KI + HP</span></button>
+ <button class="t-btn" id="tSwapP1Btn">P1: <span>JOTARO</span> ↻</button>
+ <button class="t-btn" id="tSwapP2Btn">DUMMY: <span>DIO</span> ↻</button>
+</div>
+
+<div class="top-btns" id="topBtns">
+ <button class="icon-btn" id="sfxBtn">🔊 SFX</button>
+ <button class="icon-btn" id="menuBtn">☰ MENU</button>
+</div>
+
+<div id="banner">ROUND 1</div>
+
+<!-- CONTROLS -->
+<div id="controls">
+ <div class="cluster">
+  <div class="joybox">
+   <span class="small-label">P1 MOVE / JUMP</span>
+   <div class="joystick" id="joy1"><div class="knob"></div></div>
+  </div>
+  <div class="btn-grid" id="p1LeftBtns" style="display:none">
+   <div class="btn-row">
+    <button class="act skill" id="btnSkill1L">SKILL</button>
+    <button class="act ult" id="btnUlt1L">ULT</button>
+   </div>
+   <div class="btn-row">
+    <button class="act blk" id="btnBlk1L">GUARD</button>
+    <button class="act atk" id="btnAtk1L">P1 HIT</button>
+   </div>
+  </div>
+ </div>
+
+ <div class="cluster" id="aiRight">
+  <div class="btn-grid">
+   <div class="btn-row">
+    <button class="act dash" id="btnDash1">DASH<small>STEP</small></button>
+    <button class="act skill" id="btnSkill1">SKILL<small>30% KI</small></button>
+    <button class="act ult" id="btnUlt1">ULT<small>100% KI</small></button>
+   </div>
+   <div class="btn-row">
+    <button class="act blk" id="btnBlk1">GUARD<small>+CHARGE</small></button>
+    <button class="act atk" id="btnAtk1">STRIKE<small>COMBO</small></button>
+   </div>
+  </div>
+ </div>
+
+ <div class="cluster" id="twoRight" style="display:none">
+  <div class="btn-grid">
+   <div class="btn-row">
+    <button class="act skill" id="btnSkill2">SKILL</button>
+    <button class="act ult" id="btnUlt2">P2 ULT</button>
+   </div>
+   <div class="btn-row">
+    <button class="act atk" id="btnAtk2">P2 HIT</button>
+   </div>
+  </div>
+  <div class="joybox">
+   <span class="small-label">P2 MOVE</span>
+   <div class="joystick" id="joy2"><div class="knob"></div></div>
+  </div>
+ </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div class="screen" id="result" style="display:none">
+ <main class="panel" style="max-width:440px;text-align:center">
+  <span class="badge" id="winBadge">VICTORY</span>
+  <h1 id="winner" style="margin:6px 0 8px">JOTARO WINS!</h1>
+  <p id="winQuote" style="color:#a8bee0;font-size:13px;margin:0 0 18px">"Yare Yare Daze... There's only one reason you lost, DIO."</p>
+  <button id="againBtn" class="opt selected" style="width:100%;padding:13px;margin-bottom:8px;font-size:14px">REMATCH ↻</button>
+  <button id="backBtn" class="opt" style="width:100%;padding:12px">CHARACTER SELECT</button>
+ </main>
+</div>
+
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const canvas=$('game'),ctx=canvas.getContext('2d');
+let W=innerWidth,H=innerHeight,dpr=1;
+
+/* --- WEB AUDIO SYNTHESIZER --- */
+let audioCtx=null,sfxOn=true;
+function playSfx(type){
+ if(!sfxOn)return;
+ try{
+  if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  const now=audioCtx.currentTime;
+  const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+  osc.connect(gain);gain.connect(audioCtx.destination);
+  if(type==='hit'){
+   osc.type='triangle';osc.frequency.setValueAtTime(195,now);osc.frequency.exponentialRampToValueAtTime(42,now+.09);
+   gain.gain.setValueAtTime(.25,now);gain.gain.linearRampToValueAtTime(0,now+.09);
+   osc.start(now);osc.stop(now+.09);
+  }else if(type==='heavy'){
+   osc.type='sawtooth';osc.frequency.setValueAtTime(145,now);osc.frequency.exponentialRampToValueAtTime(25,now+.22);
+   gain.gain.setValueAtTime(.36,now);gain.gain.linearRampToValueAtTime(0,now+.22);
+   osc.start(now);osc.stop(now+.22);
+  }else if(type==='beam'){
+   osc.type='sawtooth';osc.frequency.setValueAtTime(490,now);osc.frequency.exponentialRampToValueAtTime(95,now+.48);
+   gain.gain.setValueAtTime(.3,now);gain.gain.linearRampToValueAtTime(0,now+.48);
+   osc.start(now);osc.stop(now+.48);
+  }else if(type==='dash'){
+   osc.type='sine';osc.frequency.setValueAtTime(320,now);osc.frequency.exponentialRampToValueAtTime(790,now+.08);
+   gain.gain.setValueAtTime(.18,now);gain.gain.linearRampToValueAtTime(0,now+.08);
+   osc.start(now);osc.stop(now+.08);
+  }else if(type==='timestop'){
+   // Iconic Dubstep Bass Drop Time-Stop Sound!
+   osc.type='sawtooth';osc.frequency.setValueAtTime(520,now);osc.frequency.exponentialRampToValueAtTime(32,now+.65);
+   gain.gain.setValueAtTime(.42,now);gain.gain.linearRampToValueAtTime(0,now+.65);
+   osc.start(now);osc.stop(now+.65);
+  }else if(type==='ult'){
+   osc.type='square';osc.frequency.setValueAtTime(140,now);osc.frequency.exponentialRampToValueAtTime(920,now+.5);
+   gain.gain.setValueAtTime(.35,now);gain.gain.linearRampToValueAtTime(0,now+.5);
+   osc.start(now);osc.stop(now+.5);
+  }
+ }catch(e){}
+}
+$('sfxBtn').onclick=()=>{sfxOn=!sfxOn;$('sfxBtn').textContent=sfxOn?'🔊 SFX':'🔇 MUTE'};
+
+/* --- 10 PLAYABLE ANIME LEGENDS --- */
+const ROSTER={
+ jotaro:{
+  name:'JOTARO',title:'Star Platinum',color:'#3a0ca3',aura:'#b5179e',
+  speed:262,dmg:10.5,range:94,hasStand:true,standColor:'#9d4edd',
+  skillName:'Star Finger & ORA Flurry',
+  ultName:'Star Platinum: The World (Time Stop)',
+  quote:'"Yare Yare Daze... There\'s only one reason you lost, DIO."'
+ },
+ dio:{
+  name:'DIO',title:'The World',color:'#ffbe0b',aura:'#ffd166',
+  speed:268,dmg:10.5,range:94,hasStand:true,standColor:'#ffd166',
+  skillName:'Checkmate: Time-Stop Knives',
+  ultName:'ZA WARUDO! Road Roller Da!!',
+  quote:'"WRYYYYY! The World is the ultimate Stand!"'
+ },
+ kars:{
+  name:'KARS',title:'Ultimate Lifeform',color:'#7209b7',aura:'#00f5d4',
+  speed:272,dmg:10.2,range:92,
+  skillName:'Light Mode Bone Blade & Feathers',
+  ultName:'Ultimate Lifeform: Red Stone Solar Overdrive',
+  quote:'"I have finally conquered the sun itself!"'
+ },
+ goku:{
+  name:'GOKU',title:'Ultra Instinct',color:'#ff6b00',aura:'#00e5ff',
+  speed:260,dmg:10,range:80,
+  skillName:'God Ki Blast & Teleport',
+  ultName:'UI: Sky 1000-Fist & Supreme Kamehameha',
+  quote:'"Here goes... Autonomous Ultra Instinct!"'
+ },
+ luffy:{
+  name:'LUFFY',title:'Gear 5 Sun God',color:'#e63946',aura:'#ffbe0b',
+  speed:265,dmg:9.5,range:118,
+  skillName:'Gum-Gum Red Roc Gatling',
+  ultName:'Gear 5: Sun God Bajrang Gun',
+  quote:'"This is my peak! GEAR FIFTH!"'
+ },
+ naruto:{
+  name:'NARUTO',title:'Baryon Mode',color:'#ff7b00',aura:'#ff2a55',
+  speed:270,dmg:10,range:86,
+  skillName:'Sage Rasenshuriken',
+  ultName:'Baryon Nine-Tails Blitz & Rasengan',
+  quote:'"I never go back on my word... that is my Ninja Way!"'
+ },
+ gojo:{
+  name:'GOJO',title:'Unlimited Void',color:'#4361ee',aura:'#b5179e',
+  speed:265,dmg:10.5,range:90,
+  skillName:'Cursed Lapse: Red & Blue',
+  ultName:'Domain Expansion: Unlimited Void & Hollow Purple',
+  quote:'"Throughout Heaven and Earth, I alone am the honored one."'
+ },
+ ichigo:{
+  name:'ICHIGO',title:'Final Getsuga',color:'#ff5400',aura:'#ff003c',
+  speed:272,dmg:10.5,range:100,
+  skillName:'Bankai Getsuga Tensho',
+  ultName:'Mugetsu: Dimension Slash',
+  quote:'"Bankai... Tensa Zangetsu!"'
+ },
+ aizen:{
+  name:'AIZEN',title:'Hogyoku Lord',color:'#9d4edd',aura:'#e0aaff',
+  speed:250,dmg:10,range:90,
+  skillName:'Kyoka Suigetsu Shatter',
+  ultName:'Full Hado #90: Kurohitsugi',
+  quote:'"Welcome to my Soul Society."'
+ },
+ eren:{
+  name:'EREN',title:'Attack Titan',color:'#2ec4b6',aura:'#ffbf69',
+  speed:255,dmg:10,range:88,
+  skillName:'ODM Thunder Spear Blitz',
+  ultName:'Titan Transformation: Colossal Crush',
+  quote:'"I will keep moving forward!"'
+ }
+};
+const CHAR_KEYS=Object.keys(ROSTER);
+
+let mode='tourney',aiDiff='easy',stage='cairo',char1='jotaro',char2='dio';
+let tourneyLadder=[],tourneyStep=0;
+let dummyModes=['STAND','GUARD','JUMP','FIGHT AI'],dummyModeIdx=0;
+
+function buildRosterUI(containerId,isP2){
+ const box=$(containerId);box.innerHTML='';
+ Object.entries(ROSTER).forEach(([id,c])=>{
+  const card=document.createElement('div');
+  card.className='char-card'+((!isP2&&id===char1)?' selected':'')+((isP2&&id===char2)?' selected2':'');
+  card.innerHTML=`
+   <div class="avatar" style="background:radial-gradient(circle,${c.aura},${c.color});color:#08101e">${c.name[0]}</div>
+   <div class="cname">${c.name}</div>
+   <div class="ctitle">${c.title}</div>
+  `;
+  card.onclick=()=>{
+   playSfx('dash');
+   if(!isP2)char1=id;else char2=id;
+   updateRosterUI();
+  };
+  box.appendChild(card);
+ });
+}
+function updateRosterUI(){
+ buildRosterUI('c1',false);buildRosterUI('c2',true);
+ const c1=ROSTER[char1],c2=ROSTER[char2];
+ $('p1PickName').textContent=`${c1.name} (${c1.title})`;
+ $('p2PickName').textContent=`${c2.name} (${c2.title})`;
+ $('p1Moves').innerHTML=`<span>⚡ <b>Skill:</b> ${c1.skillName}</span><span>🔥 <b>Cinematic Ult:</b> ${c1.ultName}</span>`;
+ $('p2Moves').innerHTML=`<span>⚡ <b>Skill:</b> ${c2.skillName}</span><span>🔥 <b>Cinematic Ult:</b> ${c2.ultName}</span>`;
+}
+updateRosterUI();
+
+function chooseGroup(id,cb){
+ $(id).addEventListener('click',e=>{
+  const b=e.target.closest('button[data-v]');if(!b)return;
+  playSfx('dash');
+  $(id).querySelectorAll('button').forEach(x=>x.classList.toggle('selected',x===b));
+  cb(b.dataset.v);
+ });
+}
+chooseGroup('modes',v=>{
+ mode=v;
+ $('p2SelectWrap').style.display=v==='tourney'?'none':'block';
+ $('fightBtn').textContent=v==='tourney'?'ENTER GRAND TOURNAMENT 🏆':v==='train'?'ENTER TRAINING DOJO 🥋':'START ANIME DUEL ⚡';
+ $('aiRight').style.display=v==='two'?'none':'flex';
+ $('twoRight').style.display=v==='two'?'flex':'none';
+ $('p1LeftBtns').style.display=v==='two'?'flex':'none';
+});
+chooseGroup('diffs',v=>aiDiff=v);
+chooseGroup('stages',v=>stage=v);
+
+function resize(){
+ W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,2);
+ canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
+ canvas.style.width=W+'px';canvas.style.height=H+'px';
+ ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+addEventListener('resize',resize);resize();
+function ground(){return H*.68}
+
+/* --- TOURNAMENT LADDER GENERATOR --- */
+const STAGE_RANKS=['MATCH 1 · QUARTERFINAL','MATCH 2 · SEMIFINAL','MATCH 3 · PILLAR GOD SUB-BOSS','MATCH 4 · GRAND FINAL','MATCH 5 · SECRET RIVAL BOSS'];
+const STAGE_ARENAS=['dojo','namek','shibuya','cairo','cairo'];
+
+function initTournament(){
+ const pool=CHAR_KEYS.filter(k=>k!==char1);
+ for(let i=pool.length-1;i>0;i--){
+  const j=Math.floor(Math.random()*(i+1));
+  [pool[i],pool[j]]=[pool[j],pool[i]];
+ }
+ tourneyLadder=pool.slice(0,5);
+ // Ensure Jotaro faces DIO or Kars in Final!
+ if(char1==='jotaro')tourneyLadder[4]='dio';
+ else if(char1==='dio')tourneyLadder[4]='jotaro';
+ tourneyStep=0;
+ showBracketScreen();
+}
+
+function showBracketScreen(){
+ $('menu').style.display='none';
+ $('result').style.display='none';
+ $('hud').style.display='none';
+ $('controls').style.display='none';
+ $('trainBar').style.display='none';
+ $('bracketScreen').style.display='flex';
+
+ const list=$('ladderList');list.innerHTML='';
+ tourneyLadder.forEach((oppId,idx)=>{
+  const c=ROSTER[oppId];
+  const div=document.createElement('div');
+  div.className='rung'+(idx<tourneyStep?' cleared':'')+(idx===tourneyStep?' active':'');
+  const status=idx<tourneyStep?'✔ DEFEATED':idx===tourneyStep?'⚔ UP NEXT':'🔒 LOCKED';
+  div.innerHTML=`
+   <div><span style="color:var(--gold)">${STAGE_RANKS[idx]}</span><br>${c.name} <small style="color:#9cb1d4">(${c.title})</small></div>
+   <span class="rung-tag">${status}</span>
+  `;
+  list.appendChild(div);
+ });
+}
+
+$('nextMatchBtn').onclick=()=>{
+ char2=tourneyLadder[tourneyStep];
+ stage=STAGE_ARENAS[tourneyStep];
+ $('bracketScreen').style.display='none';
+ launchArenaMatch();
+};
+$('abortTourneyBtn').onclick=showMenu;
+
+/* --- TRAINING DOJO CONTROLS --- */
+$('tDummyBtn').onclick=()=>{
+ dummyModeIdx=(dummyModeIdx+1)%dummyModes.length;
+ $('tDummyBtn').innerHTML=`DUMMY: <span>${dummyModes[dummyModeIdx]}</span>`;
+};
+$('tFillBtn').onclick=()=>{
+ if(!a||!b)return;
+ a.ki=100;a.hp=100;b.hp=100;b.ki=100;
+ playSfx('dash');
+ addText(a.x,a.y-115,'MAX KI & HP!','#ffcc33');
+};
+$('tSwapP1Btn').onclick=()=>{
+ const idx=(CHAR_KEYS.indexOf(char1)+1)%CHAR_KEYS.length;
+ char1=CHAR_KEYS[idx];
+ a=makeFighter(a.x,char1,false);a.ki=100;
+ $('hudP1Name').textContent=a.cfg.name;
+ $('tSwapP1Btn').innerHTML=`P1: <span>${a.cfg.name}</span> ↻`;
+ playSfx('dash');
+};
+$('tSwapP2Btn').onclick=()=>{
+ const idx=(CHAR_KEYS.indexOf(char2)+1)%CHAR_KEYS.length;
+ char2=CHAR_KEYS[idx];
+ b=makeFighter(b.x,char2,true);
+ $('hudP2Name').textContent=b.cfg.name;
+ $('tSwapP2Btn').innerHTML=`DUMMY: <span>${b.cfg.name}</span> ↻`;
+ playSfx('dash');
+};
+
+/* --- GAME STATE & CINEMATIC DIRECTOR --- */
+let running=false,last=0,elapsed=0,round=1,roundTimer=99,timerAcc=0;
+let wins=[0,0],shake=0,hitStop=0,cinematic=null,standClashTimer=0;
+let a,b,particles=[],projectiles=[],afterimages=[],floatingTexts=[],shockwaves=[];
+
+const keys={
+ left:false,right:false,up:false,atk:false,skill:false,ult:false,blk:false,dash:false,
+ left2:false,right2:false,up2:false,atk2:false,skill2:false,ult2:false
+};
+
+function makeFighter(x,id,isP2){
+ const cfg=ROSTER[id];
+ return{
+  id,cfg,isP2,x,y:ground(),vx:0,vy:0,face:isP2?-1:1,
+  hp:100,ghostHp:100,ki:mode==='train'?100:(isP2?25:65),
+  cd:0,attack:0,combo:0,comboTimer:0,
+  flash:0,stun:0,guard:false,walk:0,bob:0,
+  awakened:0,stretch:0
+ };
+}
+
+function showBanner(txt,dur=1250){
+ const el=$('banner');el.textContent=txt;el.classList.add('show');
+ setTimeout(()=>el.classList.remove('show'),dur);
+}
+
+function isJoJoRivalry(){
+ return (a&&b)&&((a.id==='jotaro'&&b.id==='dio')||(a.id==='dio'&&b.id==='jotaro'));
+}
+
+function setupRound(){
+ a=makeFighter(W*.25,char1,false);
+ b=makeFighter(W*.75,char2,true);
+ particles=[];projectiles=[];afterimages=[];floatingTexts=[];shockwaves=[];
+ roundTimer=99;timerAcc=0;shake=0;cinematic=null;standClashTimer=0;
+ $('hudP1Name').textContent=a.cfg.name;
+ $('hudP2Name').textContent=b.cfg.name;
+ $('hudP2Sub').textContent=mode==='train'?'DUMMY':mode==='two'?'P2':(mode==='tourney'?`STAGE ${tourneyStep+1}`:`AI (${aiDiff.toUpperCase()})`);
+ $('timer').textContent=mode==='train'?'∞':'99';
+ $('roundTxt').textContent=mode==='train'?'DOJO PRACTICE':mode==='tourney'?`STAGE ${tourneyStep+1} · R${round}`:`ROUND ${round}`;
+ $('trainBar').style.display=mode==='train'?'flex':'none';
+ if(mode==='train'){
+  $('tSwapP1Btn').innerHTML=`P1: <span>${a.cfg.name}</span> ↻`;
+  $('tSwapP2Btn').innerHTML=`DUMMY: <span>${b.cfg.name}</span> ↻`;
+ }
+ updateWinsUI();
+
+ if(isJoJoRivalry()&&round===1){
+  showBanner('OH? YOU\'RE APPROACHING ME?! ゴゴゴ',1650);
+ }else{
+  showBanner(mode==='train'?'TRAINING DOJO · UNLIMITED KI':mode==='tourney'?`STAGE ${tourneyStep+1} · ROUND ${round}`:`ROUND ${round} · FIGHT!`);
+ }
+}
+
+function updateWinsUI(){
+ [$('wins1'),$('wins2')].forEach((box,idx)=>{
+  const dots=box.querySelectorAll('.win-dot');
+  dots.forEach((d,i)=>d.classList.toggle('on',i<wins[idx]));
+ });
+}
+
+function startMatchBtnHandler(){
+ if(mode==='tourney')initTournament();
+ else{
+  if(mode==='train')stage='dojo';
+  launchArenaMatch();
+ }
+}
+
+function launchArenaMatch(){
+ wins=[0,0];round=1;
+ $('menu').style.display='none';$('result').style.display='none';
+ $('bracketScreen').style.display='none';
+ $('hud').style.display='block';$('controls').style.display='flex';
+ $('topBtns').style.display='flex';
+ clearKeys();setupRound();
+ running=true;last=performance.now();requestAnimationFrame(loop);
+}
+
+function showMenu(){
+ running=false;clearKeys();
+ $('menu').style.display='flex';$('result').style.display='none';
+ $('bracketScreen').style.display='none';
+ $('hud').style.display='none';$('controls').style.display='none';
+ $('topBtns').style.display='none';$('trainBar').style.display='none';
+ draw();
+}
+$('fightBtn').onclick=startMatchBtnHandler;
+$('againBtn').onclick=()=>{
+ if(mode==='tourney'&&tourneyStep<5)showBracketScreen();
+ else startMatchBtnHandler();
+};
+$('backBtn').onclick=showMenu;$('menuBtn').onclick=showMenu;
+function clearKeys(){Object.keys(keys).forEach(k=>keys[k]=false)}
+
+function addText(x,y,txt,color='#fff'){
+ floatingTexts.push({x,y,txt,color,t:.8});
+}
+function burst(x,y,color,count=14,spd=210){
+ for(let i=0;i<count;i++){
+  const ang=Math.random()*Math.PI*2,s=40+Math.random()*spd;
+  particles.push({x,y,vx:Math.cos(ang)*s,vy:Math.sin(ang)*s,t:.25+Math.random()*.35,color,size:2.5+Math.random()*4});
+ }
+}
+function ring(x,y,color,maxR=95){
+ shockwaves.push({x,y,r:8,maxR,color,t:.28});
+}
+
+function dealDamage(att,def,dmg,kb=160,isHeavy=false){
+ if(att.isP2&&mode!=='two'){
+  const aiDmgMult=aiDiff==='easy'?0.48:aiDiff==='normal'?0.75:1.0;
+  dmg*=aiDmgMult;
+ }
+ if(def.guard&&!cinematic){
+  dmg*=0.15;kb*=0.25;
+  burst(def.x,def.y-50,'#aefeff',6,90);
+  addText(def.x,def.y-105,def.id==='gojo'?'INFINITY':'GUARD','#72efdd');
+  playSfx('hit');
+ }else{
+  def.flash=.16;def.stun=isHeavy?.34:.15;
+  def.vx=att.face*kb;
+  if(isHeavy){def.vy=-210;shake=Math.max(shake,12);hitStop=.05;playSfx('heavy');ring(def.x,def.y-55,att.cfg.aura,90)}
+  else{shake=Math.max(shake,4);playSfx('hit')}
+  burst(def.x,def.y-55,att.cfg.aura,isHeavy?18:10,isHeavy?260:150);
+  const cry=att.id==='jotaro'?'ORA!':att.id==='dio'?'MUDA!':`-${Math.max(1,Math.round(dmg))}`;
+  addText(def.x+(Math.random()*24-12),def.y-105,cry,att.cfg.aura);
+ }
+ def.hp=Math.max(mode==='train'?1:0,def.hp-dmg);
+ att.ki=Math.min(100,att.ki+(att.isP2?9:16));
+ def.ki=Math.min(100,def.ki+8);
+}
+
+/* --- SKILLS & 10 CINEMATIC ULTIMATES --- */
+function performDash(p,enemy){
+ if(p.cd>0||p.stun>0)return;
+ p.cd=.3;playSfx('dash');
+ for(let i=0;i<5;i++)afterimages.push({x:p.x+i*p.face*22,y:p.y,face:p.face,id:p.id,color:p.cfg.aura,t:.25});
+ if(Math.abs(enemy.x-p.x)<250){
+  p.x=Math.max(35,Math.min(W-35,enemy.x-p.face*52));
+ }else{
+  p.x=Math.max(35,Math.min(W-35,p.x+p.face*160));
+ }
+ ring(p.x,p.y-48,p.cfg.aura,55);
+}
+
+function performSkill(att,def){
+ if(att.ki<30||att.cd>0||att.stun>0)return;
+ if(mode!=='train')att.ki-=30;
+ att.cd=.46;att.attack=.32;
+ playSfx('beam');
+ const id=att.id;
+ if(id==='jotaro'){
+  // Star Finger + Purple ORA Flurry
+  att.stretch=135;
+  for(let i=0;i<6;i++)burst(att.x+att.face*(55+i*20),att.y-58+(Math.random()*24-12),'#b5179e',6,110);
+  if(Math.abs(def.x-att.x)<195&&Math.sign(def.x-att.x)===att.face){
+   dealDamage(att,def,16.5,220,true);
+   addText(att.x,att.y-115,'STAR FINGER: ORA ORA!','#b5179e');
+  }
+ }else if(id==='dio'){
+  // DIO Fan of Throwing Knives
+  for(let i=-1;i<=1;i++){
+   projectiles.push({x:att.x+att.face*36,y:att.y-58+i*14,vx:att.face*620,r:12,dmg:6.5,color:'#e2eafc',owner:att,type:'knife'});
+  }
+  addText(att.x,att.y-115,'CHECKMATE! (KNIVES)','#ffd166');
+ }else if(id==='kars'){
+  // Kars Light Mode Blade + Armor-Piercing Feathers
+  for(let i=0;i<2;i++){
+   projectiles.push({x:att.x+att.face*38,y:att.y-64+i*16,vx:att.face*590,r:13,dmg:8.5,color:'#00f5d4',owner:att,type:'knife'});
+  }
+  addText(att.x,att.y-115,'LIGHT BLADE SLASH!','#00f5d4');
+ }else if(id==='goku'){
+  projectiles.push({x:att.x+att.face*38,y:att.y-58,vx:att.face*560,r:15,dmg:15,color:'#00f0ff',owner:att,type:'orb'});
+  addText(att.x,att.y-115,'GOD KI BLAST!','#00f0ff');
+ }else if(id==='luffy'){
+  att.stretch=145;
+  for(let i=0;i<6;i++)burst(att.x+att.face*(55+i*22),att.y-58+(Math.random()*28-14),'#ffbe0b',6,110);
+  if(Math.abs(def.x-att.x)<190&&Math.sign(def.x-att.x)===att.face){
+   dealDamage(att,def,16,230,true);
+   addText(att.x,att.y-115,'RED ROC GATLING!','#ffbe0b');
+  }
+ }else if(id==='naruto'){
+  projectiles.push({x:att.x+att.face*40,y:att.y-58,vx:att.face*570,r:18,dmg:16,color:'#00f5d4',owner:att,type:'shuriken'});
+  addText(att.x,att.y-115,'RASENSHURIKEN!','#00f5d4');
+ }else if(id==='gojo'){
+  projectiles.push({x:att.x+att.face*40,y:att.y-58,vx:att.face*590,r:17,dmg:16.5,color:'#ff0055',owner:att,type:'orb'});
+  addText(att.x,att.y-115,'REVERSAL: RED!','#ff0055');
+ }else if(id==='ichigo'){
+  projectiles.push({x:att.x+att.face*42,y:att.y-58,vx:att.face*600,r:32,dmg:17,color:'#ff003c',owner:att,type:'crescent'});
+  addText(att.x,att.y-115,'GETSUGA TENSHO!','#ff003c');
+ }else if(id==='aizen'){
+  ring(att.x,att.y-55,'#e0aaff',80);
+  att.x=Math.max(35,Math.min(W-35,def.x-def.face*50));
+  att.face=att.x<def.x?1:-1;
+  dealDamage(att,def,16,210,true);
+  addText(att.x,att.y-115,'SHATTER, KYOKA SUIGETSU!','#e0aaff');
+ }else if(id==='eren'){
+  att.vx=att.face*480;att.vy=-140;
+  projectiles.push({x:att.x+att.face*36,y:att.y-56,vx:att.face*540,r:14,dmg:16,color:'#ffbf69',owner:att,type:'spear'});
+  addText(att.x,att.y-115,'THUNDER SPEAR!','#2ec4b6');
+ }
+}
+
+/* START 3.2-SECOND CINEMATIC ULTIMATE CUTSCENE */
+function startCinematicUlt(att,def){
+ if(att.ki<100||att.cd>0||att.stun>0||cinematic)return;
+ if(mode!=='train')att.ki=0;
+ att.awakened=12;
+ if(att.id==='jotaro'||att.id==='dio')playSfx('timestop');
+ else playSfx('ult');
+
+ cinematic={att,def,id:att.id,t:0,dur:3.2,hitTick:0,beamFired:false};
+ att.vx=0;att.vy=0;def.vx=0;def.vy=0;def.guard=false;
+ att.x=W*.36;def.x=W*.64;
+ att.y=ground();def.y=ground();
+ att.face=1;def.face=-1;
+ ring(att.x,att.y-55,att.cfg.aura,220);
+}
+
+function updateCinematic(dt){
+ const c=cinematic;if(!c)return;
+ c.t+=dt;c.hitTick+=dt;
+ const att=c.att,def=c.def;
+ const minHp=mode==='train'?1:0;
+ const ultMult=(att.isP2&&mode!=='two'&&aiDiff==='easy')?0.55:1;
+
+ if(c.id==='jotaro'){
+  // STAR PLATINUM: THE WORLD! (Time Stop + 100-Fist ORA Rush + Time Resume Explosion)
+  att.x=W*.44;def.x=W*.58;att.face=1;
+  if(c.t>0.65&&c.t<2.35&&c.hitTick>0.06){
+   c.hitTick=0;att.attack=.15;
+   burst(def.x,def.y-55,'#b5179e',12,260);
+   def.hp=Math.max(minHp+4,def.hp-1.3*ultMult);shake=10;playSfx('hit');
+   addText(def.x+(Math.random()*70-35),def.y-95+(Math.random()*40-20),'ORA ORA!!','#e0aaff');
+  }
+  if(c.t>=2.35&&!c.beamFired){
+   c.beamFired=true;playSfx('heavy');shake=30;
+   ring(def.x,def.y-55,'#00f0ff',260);
+   def.hp=Math.max(minHp,def.hp-18*ultMult);
+   addText(att.x,att.y-125,'TIME RESUMES... YARE YARE DAZE.','#00f0ff');
+  }
+ }
+
+ else if(c.id==='dio'){
+  // ZA WARUDO! ROAD ROLLER DA!!
+  att.x=W*.38;def.x=W*.60;def.y=ground();
+  if(c.t<0.8){
+   att.y=ground()-(c.t*420); // DIO leaps into the sky
+  }else if(c.t<2.35){
+   att.x=def.x;att.y=ground()-95;
+   if(c.hitTick>0.065){
+    c.hitTick=0;att.attack=.15;
+    burst(def.x,def.y-50,'#ffd166',12,260);
+    def.hp=Math.max(minHp+4,def.hp-1.4*ultMult);shake=12;playSfx('hit');
+    addText(def.x+(Math.random()*75-37),def.y-115+(Math.random()*30-15),'MUDA MUDA!!','#ffd166');
+   }
+  }else if(!c.beamFired){
+   c.beamFired=true;playSfx('heavy');shake=32;
+   ring(def.x,ground()-30,'#ff2a55',280);
+   burst(def.x,ground()-40,'#ffd166',45,380);
+   def.hp=Math.max(minHp,def.hp-19*ultMult);
+   addText(def.x,def.y-135,'WRYYYYYY!! ROAD ROLLER DA!','#ffd166');
+  }
+ }
+
+ else if(c.id==='kars'){
+  // ULTIMATE LIFEFORM KARS: Wing Ascension + Red Stone of Aja Solar Beam
+  att.x=W*.30;att.y=H*.25;def.x=W*.66;def.y=ground();att.face=1;
+  if(c.t>0.7&&c.t<2.1&&c.hitTick>0.08){
+   c.hitTick=0;
+   burst(def.x,def.y-50,'#00f5d4',12,240);
+   def.hp=Math.max(minHp+5,def.hp-1.5*ultMult);shake=9;playSfx('hit');
+   addText(def.x+(Math.random()*50-25),def.y-95,'APEX LIFEFORM!','#00f5d4');
+  }
+  if(c.t>=2.1&&!c.beamFired){
+   c.beamFired=true;playSfx('beam');shake=30;
+   ring(def.x,def.y-45,'#ff0055',260);
+   def.hp=Math.max(minHp,def.hp-20*ultMult);
+   addText(def.x,def.y-125,'RED STONE OF AJA OVERDRIVE!','#ffbe0b');
+  }
+ }
+
+ else if(c.id==='goku'){
+  if(c.t<0.7){
+   if(c.t>0.35){def.y=ground()-(c.t-0.35)*900;att.y=def.y+25}
+  }else if(c.t<2.2){
+   def.x=W*.52+(Math.sin(c.t*45)*14);def.y=H*.27+(Math.cos(c.t*35)*10);
+   if(c.hitTick>0.065){
+    c.hitTick=0;
+    const angle=Math.random()*Math.PI*2;
+    att.x=def.x+Math.cos(angle)*68;att.y=def.y+Math.sin(angle)*42;
+    att.face=att.x<def.x?1:-1;att.attack=.15;
+    afterimages.push({x:att.x,y:att.y,face:att.face,id:'goku',color:'#e0fbfc',t:.22});
+    burst(def.x,def.y-50,'#00f0ff',8,240);ring(def.x,def.y-50,'#ffffff',65);
+    def.hp=Math.max(minHp+4,def.hp-1.2*ultMult);shake=9;playSfx('hit');
+   }
+  }else{
+   att.x=W*.28;att.y=H*.22;att.face=1;
+   def.x=W*.65;def.y=Math.min(ground(),H*.28+(c.t-2.2)*520);
+   if(!c.beamFired){
+    c.beamFired=true;playSfx('beam');shake=24;
+    ring(def.x,def.y-40,'#00f0ff',220);def.hp=Math.max(minHp,def.hp-18*ultMult);
+    addText(def.x,def.y-110,'SUPREME KAMEHAMEHA!','#00f0ff');
+   }
+  }
+ }
+
+ else if(c.id==='luffy'){
+  if(c.t<0.8){
+   att.y=ground()-Math.abs(Math.sin(c.t*12))*65;
+   if(c.hitTick>0.15){c.hitTick=0;ring(att.x,att.y-50,'#ffffff',120);playSfx('dash')}
+  }else if(c.t<2.1){
+   att.x=W*.35;att.y=H*.22;def.x=W*.58;def.y=ground()-Math.abs(Math.sin(c.t*18))*45;
+   if(c.hitTick>0.09){
+    c.hitTick=0;burst(def.x,def.y-50,'#ffbe0b',10,220);
+    def.hp=Math.max(minHp+5,def.hp-1.6*ultMult);shake=8;playSfx('hit');
+   }
+  }else{
+   att.x=W*.35;att.y=H*.26;def.x=W*.58;def.y=ground();
+   if(!c.beamFired){
+    c.beamFired=true;playSfx('heavy');shake=28;
+    ring(def.x,ground()-20,'#ff2a55',260);
+    def.hp=Math.max(minHp,def.hp-20*ultMult);
+    addText(def.x,def.y-130,'BAJRANG GUN!!','#ff2a55');
+   }
+  }
+ }
+
+ else if(c.id==='naruto'){
+  if(c.t<0.75){
+   if(c.hitTick>0.12){c.hitTick=0;ring(att.x,att.y-55,'#ff2a55',140);playSfx('dash')}
+  }else if(c.t<2.2){
+   def.x=W*.58+(Math.sin(c.t*40)*12);def.y=H*.38;
+   if(c.hitTick>0.07){
+    c.hitTick=0;
+    att.x=def.x+(Math.random()>.5?-60:60);att.y=def.y+(Math.random()*30-15);
+    att.face=att.x<def.x?1:-1;att.attack=.15;
+    burst(def.x,def.y-50,'#ff2a55',10,250);
+    def.hp=Math.max(minHp+4,def.hp-1.4*ultMult);shake=10;playSfx('hit');
+   }
+  }else{
+   att.x=W*.44;att.y=ground();def.x=W*.64;def.y=ground();att.face=1;
+   if(!c.beamFired){
+    c.beamFired=true;playSfx('heavy');shake=28;
+    ring(def.x,def.y-50,'#00f5d4',240);
+    def.hp=Math.max(minHp,def.hp-19*ultMult);
+    addText(def.x,def.y-125,'BARYON ODAMA RASENGAN!','#00f5d4');
+   }
+  }
+ }
+
+ else if(c.id==='gojo'){
+  att.x=W*.28;att.y=H*.42;def.x=W*.68;def.y=H*.42;att.face=1;
+  if(c.t>0.8&&c.t<2.1&&c.hitTick>0.1){
+   c.hitTick=0;burst(def.x,def.y-50,'#b5179e',10,220);
+   def.hp=Math.max(minHp+4,def.hp-1.5*ultMult);shake=8;playSfx('hit');
+  }
+  if(c.t>=2.1&&!c.beamFired){
+   c.beamFired=true;playSfx('beam');shake=32;
+   ring(def.x,def.y-45,'#b5179e',280);
+   def.hp=Math.max(minHp,def.hp-21*ultMult);
+   addText(def.x,def.y-125,'200% HOLLOW PURPLE!','#e0aaff');
+  }
+ }
+
+ else if(c.id==='ichigo'){
+  if(c.t<1.2){
+   att.x=W*.32;def.x=W*.68;
+   if(c.hitTick>0.12){c.hitTick=0;burst(att.x,att.y-55,'#ff003c',8,160)}
+  }else if(c.t<2.2){
+   if(!c.slashed){c.slashed=true;att.x=W*.78;playSfx('ult');shake=25}
+   if(c.hitTick>0.08){
+    c.hitTick=0;burst(def.x,def.y-60,'#ff003c',16,320);
+    def.hp=Math.max(minHp+4,def.hp-2.8*ultMult);playSfx('heavy');
+   }
+  }else if(!c.beamFired){
+   c.beamFired=true;shake=30;playSfx('beam');
+   def.hp=Math.max(minHp,def.hp-16*ultMult);
+   addText(def.x,def.y-120,'MUGETSU!','#ff003c');
+  }
+ }
+
+ else if(c.id==='aizen'){
+  att.x=W*.28;def.x=W*.64;def.y=H*.44;
+  if(c.t>1.0&&c.t<2.4&&c.hitTick>0.1){
+   c.hitTick=0;burst(def.x,def.y-40,'#e0aaff',12,240);
+   def.hp=Math.max(minHp+4,def.hp-2.2*ultMult);shake=10;playSfx('hit');
+  }
+  if(c.t>=2.4&&!c.beamFired){
+   c.beamFired=true;playSfx('heavy');shake=26;
+   ring(def.x,def.y-40,'#9d4edd',220);
+   def.hp=Math.max(minHp,def.hp-17*ultMult);
+   addText(def.x,def.y-115,'HADO #90: KUROHITSUGI!','#e0aaff');
+  }
+ }
+
+ else if(c.id==='eren'){
+  att.x=W*.36;def.x=W*.64;
+  if(c.t<1.0){
+   if(c.hitTick>0.12){c.hitTick=0;ring(att.x,att.y-80,'#ffbf69',150);shake=12;playSfx('heavy')}
+  }else if(c.t<2.3){
+   if(c.hitTick>0.11){
+    c.hitTick=0;shake=15;playSfx('heavy');
+    burst(def.x,def.y-40,'#ffbf69',15,280);
+    def.hp=Math.max(minHp+4,def.hp-2.4*ultMult);
+   }
+  }else if(!c.beamFired){
+   c.beamFired=true;shake=30;playSfx('ult');
+   ring(def.x,ground()-20,'#2ec4b6',250);
+   def.hp=Math.max(minHp,def.hp-16*ultMult);
+  }
+ }
+
+ if(c.t>=c.dur){
+  att.y=ground();def.y=ground();
+  def.vx=att.face*320;def.vy=-180;
+  cinematic=null;
+ }
+}
+
+function strike(att,def,wantAtk,wantSkill,wantUlt,wantDash,dt){
+ att.cd=Math.max(0,att.cd-dt);
+ att.attack=Math.max(0,att.attack-dt);
+ att.flash=Math.max(0,att.flash-dt);
+ att.stun=Math.max(0,att.stun-dt);
+ att.comboTimer=Math.max(0,att.comboTimer-dt);
+ att.stretch=Math.max(0,att.stretch-dt*380);
+ if(att.awakened>0)att.awakened=Math.max(0,att.awakened-dt);
+
+ if(wantDash)performDash(att,def);
+ if(wantUlt)startCinematicUlt(att,def);
+ if(wantSkill)performSkill(att,def);
+
+ if(wantAtk&&att.cd<=0&&att.stun<=0){
+  att.combo=(att.comboTimer>0)?(att.combo+1)%3:0;
+  att.comboTimer=.55;
+  const aiSlow=(att.isP2&&mode!=='two')?(aiDiff==='easy'?0.44:aiDiff==='normal'?0.18:0):0;
+  att.cd=(att.combo===2?.35:.19)+aiSlow;
+  att.attack=.22;
+  if(att.id==='luffy')att.stretch=55+att.combo*28;
+
+  const reach=att.cfg.range+(att.awakened>0?32:0)+att.stretch*.5;
+  const dist=Math.abs(def.x-att.x);
+  if(dist<reach&&Math.sign(def.x-att.x)===att.face){
+   // Check for Jotaro vs DIO Iconic Stand Rush Clash!
+   if(isJoJoRivalry()&&def.attack>0&&dist<110){
+    standClashTimer=.45;shake=14;playSfx('heavy');
+    ring((att.x+def.x)/2,att.y-55,'#ffd166',130);
+    addText(att.x,att.y-115,'ORA ORA ORA!!','#b5179e');
+    addText(def.x,def.y-115,'MUDA MUDA MUDA!!','#ffd166');
+    att.vx=-att.face*190;def.vx=-def.face*190;
+    return;
+   }
+   const mult=att.combo===2?1.45:1;
+   const awkBoost=att.awakened>0?1.25:1;
+   dealDamage(att,def,att.cfg.dmg*mult*awkBoost,att.combo===2?240:95,att.combo===2);
+  }else{
+   playSfx('dash');
+  }
+ }
+}
+
+/* --- MAIN UPDATE --- */
+function update(dt){
+ if(hitStop>0){hitStop-=dt;return}
+ elapsed+=dt;
+ if(shake>0)shake=Math.max(0,shake-dt*45);
+ if(standClashTimer>0)standClashTimer=Math.max(0,standClashTimer-dt);
+
+ if(cinematic){
+  updateCinematic(dt);
+ }else{
+  // Training Mode Auto-Refill
+  if(mode==='train'){
+   a.ki=100;
+   if(b.hp<25&&b.stun<=0)b.hp=Math.min(100,b.hp+dt*45);
+   if(a.hp<100)a.hp=Math.min(100,a.hp+dt*30);
+  }else{
+   timerAcc+=dt;
+   if(timerAcc>=1){
+    timerAcc=0;
+    if(roundTimer>0)roundTimer--;
+    $('timer').textContent=roundTimer;
+    if(roundTimer===0){endRound(a.hp>=b.hp?0:1);return}
+   }
+  }
+
+  a.face=a.x<b.x?1:-1;b.face=-a.face;
+
+  // Player 1
+  a.guard=keys.blk&&a.stun<=0;
+  if(a.guard)a.ki=Math.min(100,a.ki+dt*32);
+  if(a.stun<=0&&!a.guard){
+   a.vx=((keys.right?1:0)-(keys.left?1:0))*a.cfg.speed;
+   if(keys.up&&a.y>=ground()-2){a.vy=-500;playSfx('dash')}
+  }
+  strike(a,b,keys.atk,keys.skill,keys.ult,keys.dash,dt);
+  keys.skill=false;keys.ult=false;keys.dash=false;
+
+  // Player 2, Training Dummy, or Balanced AI
+  if(mode==='two'){
+   if(b.stun<=0){
+    b.vx=((keys.right2?1:0)-(keys.left2?1:0))*b.cfg.speed;
+    if(keys.up2&&b.y>=ground()-2)b.vy=-500;
+   }
+   strike(b,a,keys.atk2,keys.skill2,keys.ult2,false,dt);
+   keys.skill2=false;keys.ult2=false;
+  }else if(mode==='train'&&dummyModes[dummyModeIdx]!=='FIGHT AI'){
+   const dm=dummyModes[dummyModeIdx];
+   b.guard=(dm==='GUARD')&&b.stun<=0;
+   if(dm==='JUMP'&&b.y>=ground()-2&&b.stun<=0)b.vy=-470;
+   strike(b,a,false,false,false,false,dt);
+  }else{
+   const baseDiff=aiDiff==='easy'?0.32:aiDiff==='normal'?0.65:1.0;
+   const tourneyScale=mode==='tourney'?(1+tourneyStep*0.08):1;
+   const diff=baseDiff*tourneyScale;
+
+   const dist=b.x-a.x,abs=Math.abs(dist);
+   b.guard=abs<95&&a.attack>0&&Math.random()<(.12*diff);
+   if(b.stun<=0&&!b.guard){
+    if(abs>b.cfg.range+12)b.vx=Math.sign(-dist)*b.cfg.speed*(0.52*diff+0.15);
+    else if(abs<38)b.vx=Math.sign(dist)*85;
+    else b.vx*=0.75;
+    if(Math.random()<(.003*diff)&&b.y>=ground()-2)b.vy=-460;
+   }
+   const aiUlt=b.ki>=100&&abs<240&&Math.random()<(.018*diff);
+   const aiSkill=b.ki>=30&&abs>130&&abs<320&&Math.random()<(.014*diff);
+   const aiDash=abs>270&&Math.random()<(.008*diff);
+   const aiAtk=abs<b.cfg.range+10&&Math.random()<(.065*diff);
+   strike(b,a,aiAtk,aiSkill,aiUlt,aiDash,dt);
+  }
+
+  for(const p of [a,b]){
+   p.vy+=1250*dt;
+   p.x+=p.vx*dt;p.y+=p.vy*dt;
+   p.vx*=0.85;
+   if(p.y>=ground()){p.y=ground();p.vy=0}
+   p.x=Math.max(35,Math.min(W-35,p.x));
+   p.walk+=Math.abs(p.vx)*dt*.055;
+   p.bob=Math.sin(elapsed*6+(p===a?0:2))*2.5;
+  }
+
+  if(Math.abs(a.x-b.x)<44&&Math.abs(a.y-b.y)<55){
+   const push=(44-Math.abs(a.x-b.x))/2;
+   if(a.x<b.x){a.x-=push;b.x+=push}else{a.x+=push;b.x-=push}
+  }
+ }
+
+ for(const p of [a,b])p.ghostHp+=(p.hp-p.ghostHp)*dt*4.5;
+
+ projectiles.forEach(pr=>{
+  pr.x+=pr.vx*dt;
+  const target=pr.owner===a?b:a;
+  if(Math.abs(pr.x-target.x)<pr.r+24&&Math.abs(pr.y-(target.y-50))<48){
+   dealDamage(pr.owner,target,pr.dmg,210,true);
+   pr.dead=true;
+  }
+  if(pr.x<-60||pr.x>W+60)pr.dead=true;
+ });
+ projectiles=projectiles.filter(p=>!p.dead);
+
+ particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=240*dt;p.t-=dt});
+ particles=particles.filter(p=>p.t>0);
+ shockwaves.forEach(s=>{s.r+=(s.maxR-s.r)*dt*12;s.t-=dt});
+ shockwaves=shockwaves.filter(s=>s.t>0);
+ afterimages.forEach(ai=>ai.t-=dt);afterimages=afterimages.filter(ai=>ai.t>0);
+ floatingTexts.forEach(ft=>{ft.y-=42*dt;ft.t-=dt});floatingTexts=floatingTexts.filter(ft=>ft.t>0);
+
+ $('hp1').style.width=a.hp+'%';$('ghost1').style.width=a.ghostHp+'%';
+ $('hp2').style.width=b.hp+'%';$('ghost2').style.width=b.ghostHp+'%';
+ $('ki1').style.width=a.ki+'%';$('ki1').classList.toggle('max',a.ki>=100);
+ $('ki2').style.width=b.ki+'%';$('ki2').classList.toggle('max',b.ki>=100);
+ $('btnUlt1').classList.toggle('ready',a.ki>=100);
+ $('btnUlt1L').classList.toggle('ready',a.ki>=100);
+ $('btnUlt2').classList.toggle('ready',b.ki>=100);
+
+ if(!cinematic&&mode!=='train'){
+  if(a.hp<=0)endRound(1);
+  else if(b.hp<=0)endRound(0);
+ }
+}
+
+function endRound(winnerIdx){
+ wins[winnerIdx]++;
+ updateWinsUI();
+ if(wins[winnerIdx]>=2){
+  running=false;clearKeys();
+  const winFighter=winnerIdx===0?a:b;
+  if(mode==='tourney'){
+   if(winnerIdx===0){
+    tourneyStep++;
+    if(tourneyStep>=5){
+     $('winBadge').textContent='🏆 GRAND TOURNAMENT CHAMPION 🏆';
+     $('winner').textContent=`${a.cfg.name} REIGNS SUPREME!`;
+     $('winQuote').textContent='You defeated all 5 Legends and claimed the Anime Championship Belt!';
+     $('againBtn').textContent='NEW TOURNAMENT 🏆';
+     setTimeout(()=>{$('result').style.display='flex';$('controls').style.display='none'},650);
+    }else{
+     showBanner(`STAGE ${tourneyStep} CLEARED!`,1200);
+     setTimeout(()=>showBracketScreen(),1300);
+    }
+   }else{
+    $('winBadge').textContent=`ELIMINATED AT STAGE ${tourneyStep+1}`;
+    $('winner').textContent=`${b.cfg.name} WINS!`;
+    $('winQuote').textContent=b.cfg.quote;
+    $('againBtn').textContent='RETRY STAGE ↻';
+    setTimeout(()=>{$('result').style.display='flex';$('controls').style.display='none'},650);
+   }
+  }else{
+   $('winBadge').textContent=mode==='two'?(winnerIdx===0?'PLAYER 1 VICTORY':'PLAYER 2 VICTORY'):(winnerIdx===0?'PLAYER 1 VICTORY':'AI VICTORY');
+   $('winner').textContent=`${winFighter.cfg.name} WINS!`;
+   $('winQuote').textContent=winFighter.cfg.quote;
+   $('againBtn').textContent='REMATCH ↻';
+   setTimeout(()=>{$('result').style.display='flex';$('controls').style.display='none'},650);
+  }
+ }else{
+  round++;setupRound();
+ }
+}
+
+/* --- FLOATING JOJO STAND SPIRIT RENDERER (STAR PLATINUM & THE WORLD) --- */
+function drawStandSpirit(p){
+ if(!p.cfg.hasStand)return;
+ ctx.save();
+ // Stand hovers behind the user, or surges forward when attacking!
+ const surge=p.attack>0?32:-24;
+ const bobY=Math.sin(elapsed*9)*5;
+ ctx.translate(surge,-18+bobY);
+ ctx.globalAlpha=p.attack>0?0.88:0.55;
+
+ const sCol=p.cfg.standColor;
+ ctx.strokeStyle=sCol;ctx.fillStyle=sCol;
+ ctx.shadowColor=sCol;ctx.shadowBlur=18;
+
+ // Stand Muscular Upper Torso
+ ctx.beginPath();ctx.moveTo(-10,-72);ctx.lineTo(12,-72);ctx.lineTo(6,-38);ctx.lineTo(-6,-38);ctx.closePath();ctx.fill();
+ // Gold Shoulder Pads / Scarf
+ ctx.fillStyle='#ffd166';
+ ctx.fillRect(-12,-74,24,5);
+
+ // Stand Head
+ ctx.fillStyle=sCol;
+ ctx.beginPath();ctx.arc(0,-85,11,0,Math.PI*2);ctx.fill();
+ if(p.id==='jotaro'){
+  // Star Platinum Flowing Black/Purple Hair & Gold Headband
+  ctx.fillStyle='#240046';
+  ctx.beginPath();ctx.moveTo(-10,-90);ctx.lineTo(-22,-106);ctx.lineTo(-4,-98);ctx.lineTo(8,-108);ctx.lineTo(10,-90);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#ffd166';ctx.fillRect(-10,-91,20,3.5);
+ }else{
+  // The World Iconic Flat-Top Pharaoh Helmet
+  ctx.fillStyle='#e09f3e';
+  ctx.beginPath();ctx.moveTo(-12,-88);ctx.lineTo(-15,-105);ctx.lineTo(15,-105);ctx.lineTo(12,-88);ctx.closePath();ctx.fill();
+ }
+
+ // Multi-Fist ORA / MUDA Barrage Effect when attacking!
+ if(p.attack>0){
+  ctx.strokeStyle=sCol;ctx.lineWidth=5;
+  for(let i=0;i<4;i++){
+   const fx=28+Math.random()*38,fy=-68+i*9+(Math.random()*8-4);
+   ctx.beginPath();ctx.moveTo(8,-60);ctx.lineTo(fx,fy);ctx.stroke();
+   ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(fx+3,fy,5,0,Math.PI*2);ctx.fill();
+  }
+ }
+ ctx.restore();
+}
+
+/* --- CHARACTER + OUTFIT + AWAKENING RENDERER --- */
+function drawFighter(p){
+ ctx.save();
+ const isTitan=p.id==='eren'&&p.awakened>0;
+ const scale=isTitan?1.65:1;
+ ctx.translate(p.x,p.y+p.bob);
+ ctx.scale(p.face*scale,scale);
+ ctx.lineCap='round';ctx.lineJoin='round';
+
+ const awk=p.awakened>0||p.ki>=100;
+ const step=Math.sin(p.walk)*12;
+ const swing=Math.cos(p.walk)*9;
+ const punchReach=30+(p.attack>0?24:0)+p.stretch;
+ const scarfWave=Math.sin(elapsed*12)*7;
+
+ // Render Floating Stand Spirit for Jotaro & DIO
+ drawStandSpirit(p);
+
+ // Menacing JoJo Kanji (ゴゴゴ) Floating Near Jotaro, DIO, and Kars
+ if(p.id==='jotaro'||p.id==='dio'||p.id==='kars'){
+  ctx.save();
+  ctx.scale(p.face,1); // Keep text upright
+  ctx.font='900 13px serif';
+  ctx.fillStyle=p.cfg.aura;ctx.shadowColor='#000';ctx.shadowBlur=4;
+  const ky=-95+Math.sin(elapsed*8)*6;
+  ctx.fillText('ゴ',-34*p.face,ky);
+  ctx.fillText('ゴ',-46*p.face,ky-14);
+  ctx.restore();
+ }
+
+ // Awakening Flame Aura
+ if(awk){
+  ctx.save();
+  const auraCol=p.id==='goku'?'#e0fbfc':p.id==='luffy'?'#ffffff':p.id==='gojo'?'#00f0ff':p.cfg.aura;
+  ctx.strokeStyle=auraCol;ctx.lineWidth=3.5;
+  ctx.shadowColor=auraCol;ctx.shadowBlur=24;
+  ctx.globalAlpha=.5+Math.sin(elapsed*25)*.22;
+  ctx.beginPath();ctx.ellipse(0,-52,32,58,0,0,Math.PI*2);ctx.stroke();
+  ctx.restore();
+ }
+
+ if(p.y>=ground()-8){
+  ctx.fillStyle='rgba(0,0,0,.38)';
+  ctx.beginPath();ctx.ellipse(0,3,26,6,0,0,Math.PI*2);ctx.fill();
+ }
+
+ const skin=p.flash>0?'#ffffff':'#ffdbac';
+
+ /* === 1. BACK CAPES / WINGS / BARYON TAILS / COAT TAILS === */
+ if(p.id==='kars'&&awk){
+  // Ultimate Kars Giant Feathered Rainbow Wings
+  ctx.save();
+  ctx.fillStyle='#7209b7';ctx.strokeStyle='#00f5d4';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(-6,-68);ctx.quadraticCurveTo(-68,-115,-52,-28);ctx.quadraticCurveTo(-25,-42,-6,-48);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.restore();
+ }else if(p.id==='jotaro'){
+  // Jotaro Flowing Black Gakuran Trench Coat Tail
+  ctx.fillStyle='#141829';
+  ctx.beginPath();ctx.moveTo(-5,-48);ctx.lineTo(-30-scarfWave,-8);ctx.lineTo(4,-12);ctx.closePath();ctx.fill();
+ }else if(p.id==='naruto'&&awk){
+  ctx.save();
+  ctx.strokeStyle='#ff2a55';ctx.lineWidth=6;ctx.shadowColor='#ff2a55';ctx.shadowBlur=16;
+  for(let t=-2;t<=2;t++){
+   ctx.beginPath();ctx.moveTo(-6,-52);
+   ctx.quadraticCurveTo(-38,-70+t*16+scarfWave,-58,-55+t*22);
+   ctx.stroke();
+  }
+  ctx.restore();
+ }else if(p.id==='aizen'){
+  ctx.fillStyle='#f8f9fa';ctx.strokeStyle='#9d4edd';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(-6,-76);ctx.lineTo(-28-Math.abs(step)*.4,-16);ctx.lineTo(6,-18);ctx.lineTo(6,-76);ctx.closePath();ctx.fill();ctx.stroke();
+ }else if(p.id==='eren'&&!isTitan){
+  ctx.fillStyle='#2a4d3b';
+  ctx.beginPath();ctx.moveTo(-5,-76);ctx.lineTo(-28-scarfWave*.5,-32);ctx.lineTo(5,-38);ctx.closePath();ctx.fill();
+ }else if(p.id==='luffy'&&awk){
+  ctx.strokeStyle='#ffffff';ctx.lineWidth=7;ctx.shadowColor='#ffffff';ctx.shadowBlur=15;
+  ctx.beginPath();ctx.arc(0,-72,26,Math.PI*.8,Math.PI*2.2);ctx.stroke();ctx.shadowBlur=0;
+ }else if(p.id==='ichigo'){
+  ctx.fillStyle='#111520';
+  ctx.beginPath();ctx.moveTo(-4,-46);ctx.lineTo(-28-scarfWave,-8);ctx.lineTo(-6,-12);ctx.closePath();ctx.fill();
+ }
+
+ /* === 2. LEGS, PANTS & BOOTS === */
+ const drawLeg=(hipX,kneeX,kneeY,footX,footY,pantCol,bootCol)=>{
+  ctx.strokeStyle=pantCol;ctx.lineWidth=10;
+  ctx.beginPath();ctx.moveTo(hipX,-42);ctx.lineTo(kneeX,kneeY);ctx.stroke();
+  ctx.strokeStyle=bootCol;ctx.lineWidth=7;
+  ctx.beginPath();ctx.moveTo(kneeX,kneeY);ctx.lineTo(footX,footY);ctx.stroke();
+ };
+ if(p.id==='jotaro'){
+  drawLeg(-4,-11+step,-20,-16+step,0,'#141829','#2b2d42');
+  drawLeg(4,11-step,-20,16-step,0,'#141829','#2b2d42');
+ }else if(p.id==='dio'){
+  drawLeg(-4,-11+step,-20,-16+step,0,'#ffbe0b','#2ec4b6');
+  drawLeg(4,11-step,-20,16-step,0,'#ffbe0b','#2ec4b6');
+ }else if(p.id==='kars'){
+  drawLeg(-4,-11+step,-20,-16+step,0,'#3c096c','#ffd166');
+  drawLeg(4,11-step,-20,16-step,0,'#3c096c','#ffd166');
+ }else if(p.id==='goku'){
+  drawLeg(-4,-11+step,-20,-16+step,0,'#ff6b00','#1d3557');
+  drawLeg(4,11-step,-20,16-step,0,'#ff6b00','#1d3557');
+ }else if(p.id==='naruto'){
+  drawLeg(-4,-11+step,-20,-16+step,0,'#ff7b00','#111520');
+  drawLeg(4,11-step,-20,16-step,0,'#ff7b00','#111520');
+ }else if(p.id==='gojo'){
+  drawLeg(-4,-11+step,-20,-16+step,0,'#0f1424','#090b12');
+  drawLeg(4,11-step,-20,16-step,0,'#0f1424','#090b12');
+ }else if(p.id==='luffy'){
+  const pCol=awk?'#ffffff':'#1d4ed8';
+  drawLeg(-4,-11+step,-20,-16+step,0,pCol,skin);
+  drawLeg(4,11-step,-20,16-step,0,pCol,skin);
+ }else if(p.id==='ichigo'||p.id==='aizen'){
+  drawLeg(-4,-11+step,-20,-16+step,0,'#111520','#ffffff');
+  drawLeg(4,11-step,-20,16-step,0,'#111520','#ffffff');
+ }else if(p.id==='eren'){
+  const pCol=isTitan?'#c97a63':'#f1faee';
+  const bCol=isTitan?'#c97a63':'#4a3525';
+  drawLeg(-4,-11+step,-20,-16+step,0,pCol,bCol);
+  drawLeg(4,11-step,-20,16-step,0,pCol,bCol);
+ }
+
+ /* === 3. TORSO CLOTHING === */
+ if(p.id==='jotaro'){
+  // High-Collar Dark Trench Coat + Gold Collar Chain + Double Belt
+  ctx.fillStyle='#141829';ctx.fillRect(-10,-78,20,36);
+  ctx.strokeStyle='#ffd166';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(4,-74);ctx.lineTo(12,-62);ctx.stroke();
+  ctx.fillStyle='#2ec4b6';ctx.fillRect(-10,-46,20,5);
+ }else if(p.id==='dio'){
+  // Black Fitted Tank + Yellow Vampire Jacket + Green Heart Belt
+  ctx.fillStyle='#111520';ctx.fillRect(-9,-76,18,34);
+  ctx.fillStyle='#ffbe0b';ctx.fillRect(-10,-76,6,30);ctx.fillRect(4,-76,6,30);
+  ctx.fillStyle='#06d6a0';ctx.fillRect(-10,-46,20,6);
+ }else if(p.id==='kars'){
+  // Pillar Man Muscular Torso + Red Stone of Aja Chest Glow
+  ctx.fillStyle=skin;ctx.fillRect(-10,-76,20,34);
+  ctx.fillStyle='#ff0055';ctx.shadowColor='#ff0055';ctx.shadowBlur=12;
+  ctx.beginPath();ctx.arc(0,-64,4,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+  ctx.fillStyle='#ffd166';ctx.fillRect(-10,-46,20,6);
+ }else if(p.id==='goku'){
+  ctx.fillStyle='#1d3557';ctx.fillRect(-9,-76,18,34);
+  ctx.fillStyle='#ff6b00';
+  ctx.beginPath();ctx.moveTo(-10,-76);ctx.lineTo(10,-76);ctx.lineTo(9,-40);ctx.lineTo(-9,-40);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#0077b6';ctx.fillRect(-10,-46,20,6);
+ }else if(p.id==='naruto'){
+  ctx.fillStyle='#ff7b00';ctx.fillRect(-10,-76,20,34);
+  ctx.fillStyle='#141824';ctx.fillRect(-10,-76,20,11);
+  ctx.fillStyle='#e63946';ctx.beginPath();ctx.arc(0,-60,3.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#141824';ctx.fillRect(-10,-45,20,5);
+ }else if(p.id==='gojo'){
+  ctx.fillStyle='#0f1424';ctx.fillRect(-10,-80,20,38);
+  ctx.fillStyle='#ffd166';
+  ctx.beginPath();ctx.arc(4,-70,2,0,Math.PI*2);ctx.arc(4,-60,2,0,Math.PI*2);ctx.fill();
+ }else if(p.id==='luffy'){
+  ctx.fillStyle=skin;ctx.fillRect(-8,-75,16,32);
+  ctx.fillStyle=awk?'#ffffff':'#e63946';
+  ctx.fillRect(-10,-75,6,30);ctx.fillRect(4,-75,6,30);
+  ctx.fillStyle=awk?'#7209b7':'#ffbe0b';ctx.fillRect(-10,-46,20,6);
+ }else if(p.id==='ichigo'){
+  const mugetsu=cinematic&&cinematic.id==='ichigo'||p.awakened>0;
+  ctx.fillStyle=mugetsu?skin:'#111520';
+  ctx.fillRect(-10,-76,20,34);
+  if(mugetsu){ctx.fillStyle='#6c757d';ctx.fillRect(-10,-68,20,16)}
+  ctx.fillStyle='#e63946';ctx.fillRect(-10,-45,20,4);
+ }else if(p.id==='aizen'){
+  ctx.fillStyle='#111520';ctx.fillRect(-10,-76,20,34);
+  ctx.fillStyle='#f8f9fa';ctx.fillRect(-10,-76,5,34);ctx.fillRect(5,-76,5,34);
+  ctx.fillStyle='#00f0ff';ctx.beginPath();ctx.arc(0,-63,3.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#9d4edd';ctx.fillRect(-10,-45,20,5);
+ }else if(p.id==='eren'){
+  if(isTitan){
+   ctx.fillStyle='#c97a63';ctx.fillRect(-12,-78,24,36);
+  }else{
+   ctx.fillStyle='#f1faee';ctx.fillRect(-9,-75,18,33);
+   ctx.fillStyle='#8d5b4c';ctx.fillRect(-10,-76,20,19);
+   ctx.fillStyle='#3d405b';ctx.fillRect(-10,-45,20,5);
+  }
+ }
+
+ /* === 4. ARMS & WEAPONS === */
+ ctx.strokeStyle=p.id==='jotaro'?'#141829':p.id==='dio'?'#ffbe0b':p.id==='gojo'?'#0f1424':p.id==='naruto'?'#ff7b00':skin;
+ ctx.lineWidth=6;
+ ctx.beginPath();ctx.moveTo(-4,-68);ctx.lineTo(-16+swing,-52);ctx.lineTo(-22+swing,-40);ctx.stroke();
+
+ const handX=p.attack>0?punchReach:22-swing;
+ const handY=p.attack>0?-58:-45;
+ ctx.strokeStyle=(p.id==='luffy'&&p.attack>0)?'#22092c':p.id==='jotaro'?'#141829':p.id==='dio'?'#ffbe0b':p.id==='gojo'?'#0f1424':p.id==='naruto'?'#ff7b00':skin;
+ ctx.lineWidth=(p.id==='luffy'&&p.attack>0)?8:6;
+ ctx.beginPath();ctx.moveTo(4,-68);ctx.lineTo(handX,handY);ctx.stroke();
+
+ // Kars Glowing Light Mode Forearm Bone Blade
+ if(p.id==='kars'){
+  ctx.strokeStyle='#00f5d4';ctx.lineWidth=3.5;ctx.shadowColor='#00f5d4';ctx.shadowBlur=14;
+  ctx.beginPath();ctx.moveTo(handX-4,handY);ctx.lineTo(handX+38,handY-8);ctx.stroke();
+  ctx.shadowBlur=0;
+ }
+ if(p.id==='naruto'&&p.attack>0){
+  ctx.fillStyle='#00f5d4';ctx.shadowColor='#00f5d4';ctx.shadowBlur=12;
+  ctx.beginPath();ctx.arc(handX+4,handY,8,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+ }
+ if(p.id==='gojo'&&p.attack>0){
+  ctx.fillStyle='#00f0ff';ctx.shadowColor='#00f0ff';ctx.shadowBlur=14;
+  ctx.beginPath();ctx.arc(handX+4,handY,8,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+ }
+ if(p.id==='luffy'&&p.attack>0){
+  ctx.fillStyle=awk?'#ffffff':'#3c096c';
+  ctx.beginPath();ctx.arc(handX+4,handY,9,0,Math.PI*2);ctx.fill();
+ }
+ if(p.id==='ichigo'){
+  ctx.fillStyle='#0b0d14';ctx.strokeStyle=awk?'#ff003c':'#e5e5e5';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(handX,handY);ctx.lineTo(handX+56,handY-10);ctx.lineTo(handX+46,handY+6);ctx.closePath();ctx.fill();ctx.stroke();
+ }
+ if(p.id==='aizen'){
+  ctx.strokeStyle='#e0aaff';ctx.lineWidth=3.5;
+  ctx.beginPath();ctx.moveTo(handX,handY);ctx.lineTo(handX+48,handY-6);ctx.stroke();
+ }
+ if(p.id==='eren'&&!isTitan){
+  ctx.strokeStyle='#e2eafc';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(handX,handY);ctx.lineTo(handX+38,handY-3);
+  ctx.moveTo(-22+swing,-40);ctx.lineTo(-46+swing,-34);ctx.stroke();
+ }
+
+ /* === 5. HEAD & HAIR === */
+ ctx.fillStyle=isTitan?'#c97a63':skin;
+ ctx.beginPath();ctx.arc(0,-89,12,0,Math.PI*2);ctx.fill();
+
+ if(p.id==='gojo'&&!awk){
+  ctx.fillStyle='#090c14';ctx.fillRect(-12,-94,24,6);
+ }else{
+  ctx.fillStyle=p.id==='gojo'?'#00f0ff':p.id==='dio'?'#ff0055':isTitan?'#00f5d4':awk&&p.id==='goku'?'#e0fbfc':awk&&p.id==='naruto'?'#ff2a55':'#111';
+  ctx.fillRect(3,-92,4,3);
+ }
+
+ if(p.id==='jotaro'){
+  // Jotaro Iconic Torn Cap + Gold Emblem + Visor
+  ctx.fillStyle='#141829';
+  ctx.beginPath();ctx.arc(0,-94,12.5,Math.PI,0);ctx.fill();
+  ctx.fillRect(0,-97,19,4.5); // Cap visor
+  ctx.fillStyle='#ffd166';ctx.fillRect(2,-101,5,4); // Gold Hand Emblem
+ }else if(p.id==='dio'){
+  // Spiky Golden Hair + Green Heart Headband
+  ctx.fillStyle='#ffbe0b';
+  ctx.beginPath();
+  ctx.moveTo(-12,-94);ctx.lineTo(-22,-110);ctx.lineTo(-5,-103);ctx.lineTo(2,-115);ctx.lineTo(10,-103);ctx.lineTo(19,-109);ctx.lineTo(12,-94);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#06d6a0';ctx.fillRect(-11,-96,22,3.5);
+ }else if(p.id==='kars'){
+  // Flowing Purple Pillar Man Hair + Gold Headband
+  ctx.fillStyle='#7209b7';
+  ctx.beginPath();ctx.arc(0,-95,13,Math.PI,0);ctx.lineTo(-26-scarfWave,-68);ctx.lineTo(-10,-85);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#ffd166';ctx.fillRect(-12,-97,24,3.5);
+ }else if(p.id==='goku'){
+  ctx.fillStyle=awk?'#e2eafc':'#10141f';
+  ctx.beginPath();
+  ctx.moveTo(-11,-95);ctx.lineTo(-26,-108);ctx.lineTo(-9,-103);
+  ctx.lineTo(-15,-120);ctx.lineTo(-1,-106);ctx.lineTo(14,-119);
+  ctx.lineTo(9,-102);ctx.lineTo(24,-105);ctx.lineTo(10,-93);ctx.closePath();ctx.fill();
+ }else if(p.id==='naruto'){
+  ctx.fillStyle='#ffbe0b';
+  ctx.beginPath();
+  ctx.moveTo(-12,-95);ctx.lineTo(-20,-110);ctx.lineTo(-6,-103);ctx.lineTo(0,-115);ctx.lineTo(7,-103);ctx.lineTo(18,-110);ctx.lineTo(12,-95);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#1d3557';ctx.fillRect(-12,-97,24,4);
+  ctx.fillStyle='#adb5bd';ctx.fillRect(2,-97,8,4);
+ }else if(p.id==='gojo'){
+  ctx.fillStyle='#f8f9fa';
+  ctx.beginPath();
+  ctx.moveTo(-12,-95);ctx.lineTo(-21,-112);ctx.lineTo(-5,-104);ctx.lineTo(2,-117);ctx.lineTo(9,-104);ctx.lineTo(20,-110);ctx.lineTo(12,-95);ctx.closePath();ctx.fill();
+ }else if(p.id==='luffy'){
+  if(awk){
+   ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(0,-98,13,Math.PI,0);
+   ctx.lineTo(15,-112);ctx.lineTo(0,-118);ctx.lineTo(-16,-110);ctx.closePath();ctx.fill();
+  }else{
+   ctx.fillStyle='#f4d35e';ctx.beginPath();ctx.ellipse(0,-99,21,5.5,0,0,Math.PI*2);ctx.fill();
+   ctx.beginPath();ctx.arc(0,-99,11.5,Math.PI,0);ctx.fill();
+  }
+ }else if(p.id==='ichigo'){
+  const mugetsu=cinematic&&cinematic.id==='ichigo'||p.awakened>0;
+  ctx.fillStyle=mugetsu?'#0d111a':'#ff6b00';
+  ctx.beginPath();ctx.moveTo(-12,-95);ctx.lineTo(-22,-114);ctx.lineTo(-3,-104);ctx.lineTo(14,-115);ctx.lineTo(12,-95);ctx.closePath();ctx.fill();
+ }else if(p.id==='aizen'){
+  ctx.fillStyle='#4a3020';ctx.beginPath();ctx.arc(0,-94,12,Math.PI,0);ctx.fill();
+ }else if(p.id==='eren'){
+  ctx.fillStyle='#2b1d14';ctx.beginPath();ctx.arc(0,-94,12.5,Math.PI*.9,Math.PI*.1);ctx.fill();
+ }
+
+ if(p.guard){
+  ctx.strokeStyle='#72efdd';ctx.lineWidth=3.5;
+  ctx.beginPath();ctx.arc(6,-54,40,-1.15,1.15);ctx.stroke();
+ }
+ ctx.restore();
+}
+
+/* --- STAGE & CINEMATIC RENDERER --- */
+function draw(){
+ ctx.clearRect(0,0,W,H);
+ ctx.save();
+
+ // JoJo Time-Stop Negative Color Inversion Filter during Jotaro or DIO Ultimate!
+ const isTimeStop=cinematic&&(cinematic.id==='jotaro'||cinematic.id==='dio')&&cinematic.t>0.2&&cinematic.t<2.35;
+ if(isTimeStop){
+  ctx.filter='invert(1) hue-rotate(170deg) contrast(1.25)';
+ }
+
+ if(shake>0)ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);
+
+ const grad=ctx.createLinearGradient(0,0,0,H);
+ if(cinematic&&cinematic.id==='gojo'){
+  grad.addColorStop(0,'#030014');grad.addColorStop(0.5,'#190033');grad.addColorStop(1,'#000814');
+ }else if(cinematic&&cinematic.id==='ichigo'&&cinematic.t>1.0){
+  grad.addColorStop(0,'#000000');grad.addColorStop(1,'#1a0008');
+ }else if(stage==='cairo'){
+  grad.addColorStop(0,'#140d2b');grad.addColorStop(1,'#090514');
+ }else if(stage==='dojo'){
+  grad.addColorStop(0,'#1b263b');grad.addColorStop(1,'#0d1b2a');
+ }else if(stage==='namek'){
+  grad.addColorStop(0,'#0f382f');grad.addColorStop(1,'#061017');
+ }else{
+  grad.addColorStop(0,'#2b193d');grad.addColorStop(1,'#080d1a');
+ }
+ ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+
+ // Dojo Grid Lines or Moon Backdrop
+ if(stage==='dojo'){
+  ctx.strokeStyle='#415a7733';ctx.lineWidth=1;
+  for(let x=0;x<W;x+=55){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,ground());ctx.stroke()}
+  for(let y=0;y<ground();y+=55){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+ }else if(cinematic&&cinematic.id==='gojo'){
+  ctx.save();
+  for(let i=0;i<65;i++){
+   const sx=(i*197)%W,sy=(i*113)%H;
+   ctx.fillStyle=i%2===0?'#00f0ff':'#ffffff';
+   ctx.fillRect(sx,sy,2.5,2.5);
+  }
+  ctx.strokeStyle='#00f0ff88';ctx.lineWidth=4;ctx.shadowColor='#00f0ff';ctx.shadowBlur=30;
+  ctx.beginPath();ctx.arc(W/2,H*.38,130,0,Math.PI*2);ctx.stroke();
+  ctx.restore();
+ }else{
+  ctx.fillStyle=stage==='cairo'?'#ffd16633':stage==='namek'?'#2ec4b633':'#ff2a6d22';
+  ctx.beginPath();ctx.arc(W*.78,H*.24,Math.min(W,H)*.13,0,Math.PI*2);ctx.fill();
+ }
+
+ // Floor
+ ctx.fillStyle=stage==='cairo'?'#1a142c':stage==='dojo'?'#1e293b':stage==='namek'?'#112222':'#171020';
+ ctx.fillRect(0,ground(),W,H-ground());
+ ctx.strokeStyle='#4e6a9c';ctx.lineWidth=3;
+ ctx.beginPath();ctx.moveTo(0,ground());ctx.lineTo(W,ground());ctx.stroke();
+
+ afterimages.forEach(ai=>{
+  ctx.save();ctx.globalAlpha=ai.t*2.2;ctx.strokeStyle=ai.color;ctx.lineWidth=4;
+  ctx.beginPath();ctx.arc(ai.x,ai.y-88,11,0,Math.PI*2);
+  ctx.moveTo(ai.x,ai.y-75);ctx.lineTo(ai.x,ai.y-35);ctx.stroke();ctx.restore();
+ });
+
+ if(a&&b){drawFighter(a);drawFighter(b)}
+
+ // CINEMATIC ULTIMATE OVERLAYS
+ if(cinematic){
+  const c=cinematic,att=c.att,def=c.def;
+  ctx.save();
+  if(c.id==='dio'&&c.t>=0.8){
+   // GIANT YELLOW ROAD ROLLER CRUSHING THE OPPONENT FROM THE SKY!
+   const ry=c.t<1.1?(H*.1+(c.t-0.8)*520):(ground()-52);
+   ctx.save();
+   ctx.translate(def.x,ry);
+   ctx.fillStyle='#ffbe0b';ctx.strokeStyle='#111';ctx.lineWidth=4;
+   ctx.shadowColor='#ffd166';ctx.shadowBlur=25;
+   ctx.fillRect(-85,-42,170,54);ctx.strokeRect(-85,-42,170,54);
+   // Road Roller Drum Wheels
+   ctx.fillStyle='#2b2d42';
+   ctx.beginPath();ctx.arc(-55,14,24,0,Math.PI*2);ctx.arc(55,14,24,0,Math.PI*2);ctx.fill();ctx.stroke();
+   ctx.fillStyle='#111';ctx.font='900 13px system-ui';ctx.textAlign='center';
+   ctx.fillText('ROAD ROLLER DA!!',0,-10);
+   ctx.restore();
+  }else if(c.id==='kars'&&c.t>=2.0){
+   // Red Stone of Aja Solar Beam from the Sky
+   ctx.strokeStyle='#ff0055';ctx.lineWidth=64;ctx.shadowColor='#ffbe0b';ctx.shadowBlur=40;
+   ctx.beginPath();ctx.moveTo(att.x+15,att.y-50);ctx.lineTo(def.x+20,ground());ctx.stroke();
+   ctx.strokeStyle='#ffbe0b';ctx.lineWidth=28;
+   ctx.beginPath();ctx.moveTo(att.x+15,att.y-50);ctx.lineTo(def.x+20,ground());ctx.stroke();
+  }else if(c.id==='goku'&&c.t>=2.2){
+   ctx.strokeStyle='#00f0ff';ctx.lineWidth=68;ctx.shadowColor='#00f0ff';ctx.shadowBlur=35;
+   ctx.beginPath();ctx.moveTo(att.x+20,att.y-50);ctx.lineTo(def.x+40,ground());ctx.stroke();
+   ctx.strokeStyle='#ffffff';ctx.lineWidth=32;
+   ctx.beginPath();ctx.moveTo(att.x+20,att.y-50);ctx.lineTo(def.x+40,ground());ctx.stroke();
+  }else if(c.id==='luffy'&&c.t>=1.2){
+   const fistY=c.t<2.1?H*.12:(H*.12+(c.t-2.1)*300);
+   ctx.fillStyle='#240046';ctx.strokeStyle='#ff0055';ctx.lineWidth=5;ctx.shadowColor='#ff0055';ctx.shadowBlur=35;
+   ctx.beginPath();ctx.arc(def.x,fistY,82,0,Math.PI*2);ctx.fill();ctx.stroke();
+  }else if(c.id==='naruto'&&c.t>=2.1){
+   ctx.fillStyle='#00f5d4';ctx.strokeStyle='#ff2a55';ctx.lineWidth=6;ctx.shadowColor='#ff2a55';ctx.shadowBlur=35;
+   ctx.beginPath();ctx.arc(def.x,def.y-55,75,0,Math.PI*2);ctx.fill();ctx.stroke();
+  }else if(c.id==='gojo'){
+   if(c.t<2.0){
+    const spread=Math.max(0,(1.9-c.t)*120);
+    ctx.fillStyle='#00f0ff';ctx.shadowColor='#00f0ff';ctx.shadowBlur=25;
+    ctx.beginPath();ctx.arc(W/2-spread,H*.38,32,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#ff0055';ctx.shadowColor='#ff0055';
+    ctx.beginPath();ctx.arc(W/2+spread,H*.38,32,0,Math.PI*2);ctx.fill();
+   }else{
+    const px=W*.35+(c.t-2.0)*340;
+    ctx.fillStyle='#b5179e';ctx.strokeStyle='#ffffff';ctx.lineWidth=6;ctx.shadowColor='#e0aaff';ctx.shadowBlur=45;
+    ctx.beginPath();ctx.arc(px,H*.4,90,0,Math.PI*2);ctx.fill();ctx.stroke();
+   }
+  }else if(c.id==='ichigo'&&c.t>=1.2){
+   ctx.fillStyle='#000000';ctx.strokeStyle='#ff003c';ctx.lineWidth=6;ctx.shadowColor='#ff003c';ctx.shadowBlur=35;
+   ctx.fillRect(def.x-35,0,70,H);ctx.strokeRect(def.x-35,0,70,H);
+  }else if(c.id==='aizen'&&c.t>=0.6){
+   ctx.fillStyle='rgba(12,0,28,0.92)';ctx.strokeStyle='#e0aaff';ctx.lineWidth=4;ctx.shadowColor='#9d4edd';ctx.shadowBlur=30;
+   ctx.fillRect(def.x-60,def.y-115,120,145);ctx.strokeRect(def.x-60,def.y-115,120,145);
+  }else if(c.id==='eren'&&c.t<1.1){
+   ctx.strokeStyle='#ffbf69';ctx.lineWidth=18;ctx.shadowColor='#ffbf69';ctx.shadowBlur=30;
+   ctx.beginPath();ctx.moveTo(att.x,0);ctx.lineTo(att.x-20,H*.35);ctx.lineTo(att.x+15,ground());ctx.stroke();
+  }
+
+  ctx.filter='none';
+  ctx.fillStyle='#040711ee';
+  ctx.fillRect(0,0,W,44);ctx.fillRect(0,H-44,W,44);
+  ctx.fillStyle=att.cfg.aura;ctx.font='italic 900 clamp(13px,3.2vw,20px) system-ui';
+  ctx.textAlign='center';ctx.shadowColor=att.cfg.aura;ctx.shadowBlur=12;
+  ctx.fillText(`★ ${att.cfg.ultName.toUpperCase()} ★`,W/2,28);
+  ctx.restore();
+ }
+
+ ctx.filter='none';
+
+ // Projectiles (Knives, Feathers, Shuriken, Orbs)
+ projectiles.forEach(pr=>{
+  ctx.save();ctx.fillStyle=pr.color;ctx.strokeStyle='#fff';ctx.lineWidth=2.5;
+  ctx.shadowColor=pr.color;ctx.shadowBlur=18;
+  ctx.beginPath();
+  if(pr.type==='crescent'){ctx.arc(pr.x,pr.y,pr.r,-1.15,1.15,false);ctx.stroke()}
+  else if(pr.type==='knife'){
+   const dir=Math.sign(pr.vx);
+   ctx.moveTo(pr.x-dir*12,pr.y-3);ctx.lineTo(pr.x+dir*14,pr.y);ctx.lineTo(pr.x-dir*12,pr.y+3);ctx.closePath();ctx.fill();
+  }else if(pr.type==='shuriken'){
+   ctx.arc(pr.x,pr.y,pr.r*.6,0,Math.PI*2);ctx.fill();
+   ctx.ellipse(pr.x,pr.y,pr.r*1.4,5,elapsed*18,0,Math.PI*2);ctx.stroke();
+  }else{ctx.arc(pr.x,pr.y,pr.r,0,Math.PI*2);ctx.fill()}
+  ctx.restore();
+ });
+
+ shockwaves.forEach(s=>{
+  ctx.save();ctx.globalAlpha=Math.max(0,s.t*3);ctx.strokeStyle=s.color;ctx.lineWidth=3.5;
+  ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.stroke();ctx.restore();
+ });
+
+ particles.forEach(p=>{
+  ctx.globalAlpha=Math.max(0,p.t*2.2);ctx.fillStyle=p.color;
+  ctx.fillRect(p.x,p.y,p.size,p.size);
+ });
+ ctx.globalAlpha=1;
+
+ floatingTexts.forEach(ft=>{
+  ctx.save();ctx.font='italic 900 14px system-ui';ctx.fillStyle=ft.color;
+  ctx.shadowColor='#000';ctx.shadowBlur=5;ctx.textAlign='center';
+  ctx.fillText(ft.txt,ft.x,ft.y);ctx.restore();
+ });
+
+ ctx.restore();
+}
+
+function loop(now){
+ if(!running)return;
+ const dt=Math.min((now-last)/1000,.033);last=now;
+ update(dt);draw();requestAnimationFrame(loop);
+}
+
+/* --- VIRTUAL JOYSTICK & BUTTONS --- */
+function bindJoystick(id,leftK,rightK,upK){
+ const pad=$(id),knob=pad.querySelector('.knob');
+ let pid=null;
+ function move(e){
+  const r=pad.getBoundingClientRect();
+  let dx=e.clientX-(r.left+r.width/2);
+  let dy=e.clientY-(r.top+r.height/2);
+  const max=r.width*.3,dist=Math.hypot(dx,dy);
+  if(dist>max){dx=dx/dist*max;dy=dy/dist*max}
+  knob.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;
+  keys[leftK]=dx<-10;keys[rightK]=dx>10;keys[upK]=dy<-18;
+ }
+ function reset(){
+  pid=null;pad.classList.remove('active');
+  knob.style.transform='translate(-50%,-50%)';
+  keys[leftK]=keys[rightK]=keys[upK]=false;
+ }
+ pad.addEventListener('pointerdown',e=>{
+  e.preventDefault();pid=e.pointerId;pad.classList.add('active');
+  pad.setPointerCapture(pid);move(e);
+ });
+ pad.addEventListener('pointermove',e=>{if(e.pointerId===pid)move(e)});
+ ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>pad.addEventListener(ev,reset));
+}
+bindJoystick('joy1','left','right','up');
+bindJoystick('joy2','left2','right2','up2');
+
+function bindBtn(id,key){
+ const el=$(id);if(!el)return;
+ el.addEventListener('pointerdown',e=>{e.preventDefault();keys[key]=true;el.classList.add('pressed')});
+ ['pointerup','pointercancel','pointerleave','lostpointercapture'].forEach(ev=>
+  el.addEventListener(ev,e=>{e.preventDefault();keys[key]=false;el.classList.remove('pressed')}));
+}
+bindBtn('btnAtk1','atk');bindBtn('btnSkill1','skill');
+bindBtn('btnUlt1','ult');bindBtn('btnBlk1','blk');bindBtn('btnDash1','dash');
+bindBtn('btnAtk1L','atk');bindBtn('btnSkill1L','skill');
+bindBtn('btnUlt1L','ult');bindBtn('btnBlk1L','blk');
+bindBtn('btnAtk2','atk2');bindBtn('btnSkill2','skill2');bindBtn('btnUlt2','ult2');
+
+const keyMap={
+ a:'left',d:'right',w:'up',j:'atk',k:'skill',l:'ult',u:'blk',i:'dash',
+ ArrowLeft:'left2',ArrowRight:'right2',ArrowUp:'up2','1':'atk2','2':'skill2','3':'ult2'
+};
+addEventListener('keydown',e=>{const k=keyMap[e.key];if(k){keys[k]=true;e.preventDefault()}});
+addEventListener('keyup',e=>{const k=keyMap[e.key];if(k)keys[k]=false});
+
+draw();
+})();
+</script>
+</body>
+</html>
